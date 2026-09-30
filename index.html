@@ -95,7 +95,23 @@
   .lang button[aria-pressed="true"] { background: var(--accent-container); color: var(--on-accent-container); }
 
   /* Hero */
-  .hero { padding: 56px 0 32px; }
+  body::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 720px; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(600px 360px at 85% 80px, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+      radial-gradient(520px 320px at 5% 0, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%);
+  }
+  body { position: relative; isolation: isolate; }
+  .hero { padding: 64px 0 40px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 48px; align-items: center; }
+  .hero-art { width: 100%; height: auto; filter: drop-shadow(0 18px 40px color-mix(in srgb, var(--accent) 22%, transparent)); }
+  .hero-art .phone { fill: var(--raised); stroke: var(--border); }
+  .hero-art .screen { fill: var(--surface); }
+  .hero-art .paper { fill: var(--bg); stroke: var(--border); }
+  .hero-art .line { stroke: var(--text-3); opacity: .45; }
+  .hero-art .accent { fill: var(--accent); }
+  .hero-art .accent-stroke { stroke: var(--accent); }
+  .hero-art .badge { fill: var(--good-container); stroke: var(--bg); }
+  .hero-art .tick { stroke: var(--good); }
   .eyebrow { font-size: 14px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
   h1 { font-size: clamp(34px, 6vw, 52px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 16px; font-weight: 700; }
   .lede { font-size: 19px; color: var(--text-2); max-width: 680px; margin: 0 0 20px; }
@@ -106,8 +122,9 @@
   .glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 8px 0 48px; }
   .card {
     background: var(--raised); border: 1px solid var(--border); border-radius: 20px; padding: 20px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow); transition: transform .2s ease, border-color .2s ease;
   }
+  .card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
   .card .ico {
     width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
     background: var(--accent-container); color: var(--on-accent-container); margin-bottom: 12px;
@@ -132,6 +149,7 @@
 
   article { max-width: 720px; }
   article section { scroll-margin-top: 84px; padding-top: 8px; margin-bottom: 40px; }
+  article section + section { border-top: 1px solid var(--border); padding-top: 40px; }
   article h2 { font-size: 26px; line-height: 1.25; letter-spacing: -.01em; margin: 0 0 12px; font-weight: 700; display: flex; gap: 12px; align-items: baseline; }
   article h2 .n { color: var(--accent); font-size: 18px; font-variant-numeric: tabular-nums; min-width: 24px; }
   article h3 { font-size: 18px; margin: 24px 0 6px; font-weight: 600; }
@@ -155,6 +173,7 @@
   td { color: var(--text-2); }
   tr:last-child td { border-bottom: 0; }
   td:first-child { color: var(--text); font-weight: 500; min-width: 150px; }
+  @media (max-width: 520px) { th, td { padding: 10px 12px; } td:first-child { min-width: 104px; } }
 
   .contact {
     background: var(--raised); border: 1px solid var(--border); border-radius: 20px; padding: 20px 24px; box-shadow: var(--shadow);
@@ -171,7 +190,8 @@
   @media (max-width: 880px) {
     .layout { grid-template-columns: 1fr; gap: 0; }
     nav.toc { position: static; max-height: none; background: var(--raised); border: 1px solid var(--border); border-radius: 20px; padding: 16px; margin-bottom: 40px; }
-    .hero { padding-top: 36px; }
+    .hero { padding-top: 36px; grid-template-columns: 1fr; }
+    .hero-art { display: none; }
     body { font-size: 16px; }
   }
   @media print {
@@ -205,6 +225,7 @@
 <!-- ============================ ENGLISH ============================ -->
 <main id="en" lang="en" class="wrap">
   <div class="hero">
+    <div>
     <p class="eyebrow">Privacy Policy</p>
     <h1>Your scans stay on your phone.</h1>
     <p class="lede">Scannery is a document and photo scanner. <strong>We don't collect any data.</strong> Scannery has no accounts and no servers, and your scans never leave your device unless you share them. This policy explains what the app handles, where it's stored, and the choices you have.</p>
@@ -212,6 +233,21 @@
       <span>Effective: September 30, 2026</span>
       <span>Applies to Scannery for Android and iOS</span>
     </div>
+    </div>
+    <svg class="hero-art" viewBox="0 0 300 340" role="img" aria-label="A phone scanning a document, protected by a shield">
+    <rect class="phone" x="60" y="10" width="180" height="320" rx="30" stroke-width="2"/>
+    <rect class="screen" x="72" y="22" width="156" height="296" rx="20"/>
+    <rect class="line" x="130" y="30" width="40" height="5" rx="2.5" fill="currentColor" stroke="none"/>
+    <g transform="rotate(-4 150 150)">
+      <rect class="paper" x="92" y="62" width="116" height="150" rx="6" stroke-width="1.5"/>
+      <path class="line" d="M106 86h60M106 102h88M106 118h80M106 134h88M106 150h52M106 174h70M106 190h44" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <path class="accent-stroke" d="M84 52v-14h14M216 52v-14h-14M84 226v14h14M216 226v14h-14" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle class="accent" cx="150" cy="286" r="18"/>
+    <circle cx="150" cy="286" r="12" fill="none" stroke="var(--bg)" stroke-width="2.5" opacity=".9"/>
+    <path class="badge" d="M236 190l34 12v26c0 22-15 36-34 44-19-8-34-22-34-44v-26z" stroke-width="4"/>
+    <path class="tick" d="M222 228l10 10 18-20" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
   </div>
 
   <div class="glance" aria-label="At a glance">
@@ -394,6 +430,7 @@
 <!-- ============================ PORTUGUÊS ============================ -->
 <main id="pt" lang="pt-PT" class="wrap" hidden>
   <div class="hero">
+    <div>
     <p class="eyebrow">Política de Privacidade</p>
     <h1>As suas digitalizações ficam no seu telemóvel.</h1>
     <p class="lede">O Scannery é um digitalizador de documentos e fotografias. <strong>Não recolhemos quaisquer dados.</strong> O Scannery não tem contas nem servidores, e as suas digitalizações nunca saem do dispositivo, a menos que as partilhe. Esta política explica o que a aplicação trata, onde fica guardado e que escolhas tem.</p>
@@ -401,6 +438,21 @@
       <span>Em vigor: 30 de setembro de 2026</span>
       <span>Aplica-se ao Scannery para Android e iOS</span>
     </div>
+    </div>
+    <svg class="hero-art" viewBox="0 0 300 340" role="img" aria-label="Um telemóvel a digitalizar um documento, protegido por um escudo">
+    <rect class="phone" x="60" y="10" width="180" height="320" rx="30" stroke-width="2"/>
+    <rect class="screen" x="72" y="22" width="156" height="296" rx="20"/>
+    <rect class="line" x="130" y="30" width="40" height="5" rx="2.5" fill="currentColor" stroke="none"/>
+    <g transform="rotate(-4 150 150)">
+      <rect class="paper" x="92" y="62" width="116" height="150" rx="6" stroke-width="1.5"/>
+      <path class="line" d="M106 86h60M106 102h88M106 118h80M106 134h88M106 150h52M106 174h70M106 190h44" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <path class="accent-stroke" d="M84 52v-14h14M216 52v-14h-14M84 226v14h14M216 226v14h-14" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle class="accent" cx="150" cy="286" r="18"/>
+    <circle cx="150" cy="286" r="12" fill="none" stroke="var(--bg)" stroke-width="2.5" opacity=".9"/>
+    <path class="badge" d="M236 190l34 12v26c0 22-15 36-34 44-19-8-34-22-34-44v-26z" stroke-width="4"/>
+    <path class="tick" d="M222 228l10 10 18-20" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
   </div>
 
   <div class="glance" aria-label="Resumo">
