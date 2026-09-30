@@ -1,145 +1,642 @@
-# Privacy Policy
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scannery Privacy Policy</title>
+<meta name="description" content="How Scannery, the document and photo scanner, handles your data: your scans stay on your device.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Colours follow the app's design tokens (lib/core/theme/folio_tokens.dart). */
+  :root {
+    --bg: #F8FAFD;
+    --raised: #FFFFFF;
+    --surface: #F0F4F9;
+    --surface-strong: #E9EEF6;
+    --border: #DDE3EA;
+    --text: #1F1F1F;
+    --text-2: #444746;
+    --text-3: #5F6368;
+    --accent: #0B57D0;
+    --accent-container: #D3E3FD;
+    --on-accent-container: #041E49;
+    --good: #146C2E;
+    --good-container: #C4EED0;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131314;
+      --raised: #1E1F20;
+      --surface: #1E1F20;
+      --surface-strong: #282A2C;
+      --border: #3A3C3E;
+      --text: #E3E3E3;
+      --text-2: #C4C7C5;
+      --text-3: #9AA0A6;
+      --accent: #A8C7FA;
+      --accent-container: #0842A0;
+      --on-accent-container: #D3E3FD;
+      --good: #6DD58C;
+      --good-container: #0F5223;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131314;
+    --raised: #1E1F20;
+    --surface: #1E1F20;
+    --surface-strong: #282A2C;
+    --border: #3A3C3E;
+    --text: #E3E3E3;
+    --text-2: #C4C7C5;
+    --text-3: #9AA0A6;
+    --accent: #A8C7FA;
+    --accent-container: #0842A0;
+    --on-accent-container: #D3E3FD;
+    --good: #6DD58C;
+    --good-container: #0F5223;
+    --shadow: none;
+  }
 
-**Scannery**
-**Last updated: September 29, 2026**
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 400 17px/1.65 "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
-Scannery ("the App") is a document and photo scanning application that allows users to digitize, enhance, organize, store, and share documents and photographs.
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
 
-This Privacy Policy explains how Scannery handles information when you use the App. We are committed to protecting your privacy and minimizing the collection of personal data.
+  /* Header */
+  header.top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
+  .brand svg { flex: none; }
+  .lang { display: inline-flex; background: var(--surface-strong); border-radius: 999px; padding: 3px; }
+  .lang button {
+    font: inherit; font-size: 14px; font-weight: 600; border: 0; background: transparent; color: var(--text-2);
+    padding: 5px 14px; border-radius: 999px; cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] { background: var(--accent-container); color: var(--on-accent-container); }
 
-## 1. Data Controller
+  /* Hero */
+  .hero { padding: 56px 0 32px; }
+  .eyebrow { font-size: 14px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  h1 { font-size: clamp(34px, 6vw, 52px); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 16px; font-weight: 700; }
+  .lede { font-size: 19px; color: var(--text-2); max-width: 680px; margin: 0 0 20px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 14px; color: var(--text-3); }
+  .meta span { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; }
 
-The data controller responsible for the processing of personal data in connection with Scannery is:
+  /* At a glance */
+  .glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 8px 0 48px; }
+  .card {
+    background: var(--raised); border: 1px solid var(--border); border-radius: 20px; padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card .ico {
+    width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+    background: var(--accent-container); color: var(--on-accent-container); margin-bottom: 12px;
+  }
+  .card h3 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
+  .card p { margin: 0; font-size: 15px; color: var(--text-2); line-height: 1.5; }
 
-**Developer:** Sérgio Valentim
-**Country:** Portugal
-**Email:** devsupport.address@gmail.com
+  /* Layout */
+  .layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 56px; padding-bottom: 80px; }
+  nav.toc { position: sticky; top: 84px; align-self: start; max-height: calc(100vh - 100px); overflow: auto; }
+  nav.toc p { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); margin: 0 0 8px; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  nav.toc li { counter-increment: toc; }
+  nav.toc a {
+    display: flex; gap: 8px; padding: 6px 10px; border-radius: 10px; font-size: 14px; line-height: 1.4;
+    color: var(--text-2); text-decoration: none;
+  }
+  nav.toc a::before { content: counter(toc); color: var(--text-3); min-width: 16px; font-variant-numeric: tabular-nums; }
+  nav.toc a:hover { background: var(--surface-strong); color: var(--text); }
+  nav.toc a.active { background: var(--accent-container); color: var(--on-accent-container); }
+  nav.toc a.active::before { color: inherit; }
 
-For any questions or requests regarding this Privacy Policy or your personal data, you can contact us using the email address above.
+  article { max-width: 720px; }
+  article section { scroll-margin-top: 84px; padding-top: 8px; margin-bottom: 40px; }
+  article h2 { font-size: 26px; line-height: 1.25; letter-spacing: -.01em; margin: 0 0 12px; font-weight: 700; display: flex; gap: 12px; align-items: baseline; }
+  article h2 .n { color: var(--accent); font-size: 18px; font-variant-numeric: tabular-nums; min-width: 24px; }
+  article h3 { font-size: 18px; margin: 24px 0 6px; font-weight: 600; }
+  article p, article li { color: var(--text-2); }
+  article strong { color: var(--text); font-weight: 600; }
+  article ul { padding-left: 22px; }
+  article li { margin: 4px 0; }
+  article li::marker { color: var(--accent); }
 
-## 2. Information We Access and Process
+  .callout {
+    background: var(--good-container); color: var(--text); border-radius: 16px; padding: 14px 18px; margin: 16px 0;
+    display: flex; gap: 12px; align-items: flex-start; font-size: 16px;
+  }
+  .callout svg { flex: none; color: var(--good); margin-top: 3px; }
+  .callout p { margin: 0; color: inherit; }
 
-### Documents and Photographs
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 16px; margin: 16px 0; background: var(--raised); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; line-height: 1.5; }
+  th, td { text-align: left; vertical-align: top; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  th { background: var(--surface); font-weight: 600; color: var(--text); font-size: 14px; }
+  td { color: var(--text-2); }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { color: var(--text); font-weight: 500; min-width: 150px; }
 
-Scannery allows you to scan physical documents and photographs using your device's camera or import existing images from your photo library.
+  .contact {
+    background: var(--raised); border: 1px solid var(--border); border-radius: 20px; padding: 20px 24px; box-shadow: var(--shadow);
+  }
+  .contact dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; margin: 0; }
+  .contact dt { color: var(--text-3); font-size: 15px; }
+  .contact dd { margin: 0; color: var(--text); font-weight: 500; overflow-wrap: anywhere; }
 
-These may contain personal information, such as names, addresses, financial information, or other sensitive details, depending on the documents you choose to scan.
+  footer { border-top: 1px solid var(--border); padding: 24px 0 40px; font-size: 14px; color: var(--text-3); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
 
-Scannery uses this information to provide its core functionality, including:
+  [hidden] { display: none !important; }
 
-* Capturing documents and photographs.
-* Detecting document boundaries and correcting perspective.
-* Enhancing image quality, contrast, and readability.
-* Converting scans into PDF, JPEG, or PNG files.
-* Organizing scans into folders.
-* Allowing you to export and share your scans.
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    nav.toc { position: static; max-height: none; background: var(--raised); border: 1px solid var(--border); border-radius: 20px; padding: 16px; margin-bottom: 40px; }
+    .hero { padding-top: 36px; }
+    body { font-size: 16px; }
+  }
+  @media print {
+    header.top, nav.toc, .lang { display: none; }
+    .layout { display: block; }
+    body { background: #fff; color: #000; }
+    .card, .contact { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
 
-Your scanned documents and photographs are processed and stored locally on your device. We do not receive, collect, or store the contents of your scans on our servers.
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+        <rect width="28" height="28" rx="8" fill="var(--accent)"/>
+        <path d="M9 7h7l4 4v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z" fill="var(--bg)"/>
+        <path d="M16 7v4h4" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        <path d="M10.5 14.5h7M10.5 17.5h5" stroke="var(--accent)" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Scannery
+    </a>
+    <div class="lang" role="group" aria-label="Language / Idioma">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="pt" aria-pressed="false">PT</button>
+    </div>
+  </div>
+</header>
 
-### Camera and Photo Library
+<!-- ============================ ENGLISH ============================ -->
+<main id="en" lang="en" class="wrap">
+  <div class="hero">
+    <p class="eyebrow">Privacy Policy</p>
+    <h1>Your scans stay on your phone.</h1>
+    <p class="lede">Scannery is a document and photo scanner. It has no accounts and no servers, and it doesn't send your scans anywhere. This policy explains what the app handles, where it's stored, and the choices you have.</p>
+    <div class="meta">
+      <span>Effective: September 30, 2026</span>
+      <span>Applies to Scannery for Android and iOS</span>
+    </div>
+  </div>
 
-Scannery may request access to your device's camera to capture documents and photographs, and access to images you choose to import from your photo library.
+  <div class="glance" aria-label="At a glance">
+    <div class="card">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
+      <h3>Processed on your device</h3>
+      <p>Edge detection, image enhancement, text recognition and PDF creation all run on the phone.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M3 3l18 18"/></svg></div>
+      <h3>No account, no tracking</h3>
+      <p>No sign-up, no ads, no analytics, and no crash reporting from us.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg></div>
+      <h3>You decide what leaves</h3>
+      <p>A file leaves Scannery only when you share it or save it to a folder you pick.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></div>
+      <h3>Delete any time</h3>
+      <p>Delete a scan or folder in the app, or uninstall to remove everything.</p>
+    </div>
+  </div>
 
-These permissions are used exclusively to provide the scanning and importing functionality you request. You can manage or revoke these permissions at any time through your device's settings, although doing so may limit certain features.
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <p>Contents</p>
+      <ol>
+        <li><a href="#en-who">Who we are</a></li>
+        <li><a href="#en-stored">What the app stores</a></li>
+        <li><a href="#en-permissions">Permissions</a></li>
+        <li><a href="#en-ocr">Text recognition (Google ML Kit)</a></li>
+        <li><a href="#en-collect">What we don't collect</a></li>
+        <li><a href="#en-sharing">Sharing and saving</a></li>
+        <li><a href="#en-backups">Device backups</a></li>
+        <li><a href="#en-retention">Keeping and deleting data</a></li>
+        <li><a href="#en-security">Security</a></li>
+        <li><a href="#en-legal">Legal basis (GDPR)</a></li>
+        <li><a href="#en-rights">Your rights</a></li>
+        <li><a href="#en-children">Children</a></li>
+        <li><a href="#en-transfers">International transfers</a></li>
+        <li><a href="#en-changes">Changes to this policy</a></li>
+        <li><a href="#en-contact">Contact</a></li>
+      </ol>
+    </nav>
 
-## 3. How Your Information Is Used
+    <article>
+      <section id="en-who">
+        <h2><span class="n">1</span>Who we are</h2>
+        <p>Scannery ("the App") is developed by <strong>Sérgio Valentim</strong>, an independent developer based in Portugal ("we", "us"). We are the data controller for any personal data processed in connection with the App, as described in this policy.</p>
+        <p>Scannery lets you scan paper documents and photographs with your camera or import them from your photo library, clean them up, organise them in folders, search their text, and export them as PDF, JPEG or PNG.</p>
+      </section>
 
-Information accessed by Scannery is used to:
+      <section id="en-stored">
+        <h2><span class="n">2</span>What the app stores, and where</h2>
+        <p>What you scan may contain personal information, such as names, addresses, ID numbers, bank details or health information, depending on what you choose to scan. Scannery stores everything in its private storage area on your device. We have no servers, and we never receive, see or store your scans.</p>
+        <div class="callout">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          <p>Nothing in the table below is sent to us. It stays in the App's storage on your device until you delete it.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Why it's kept</th></tr></thead>
+            <tbody>
+              <tr><td>Original photos</td><td>The unmodified camera or gallery image behind each page. They're kept so you can change the crop or look later without rescanning.</td></tr>
+              <tr><td>Processed pages</td><td>The cropped, straightened and enhanced versions you see in the App, plus cached previews and thumbnails.</td></tr>
+              <tr><td>Editing settings</td><td>Crop corners, rotation, page order and the chosen preset (for example "B&amp;W Enhanced" or "Restore") for each page.</td></tr>
+              <tr><td>Recognised text</td><td>Text read from your pages by on-device OCR. It's used for search in your library, to suggest a scan name, and as a selectable text layer in exported PDFs.</td></tr>
+              <tr><td>Library information</td><td>Scan and folder names, the folder structure, creation and modification dates, and page counts.</td></tr>
+              <tr><td>Preferences</td><td>Theme, default export format and quality, auto-capture setting, library view and sort order, the last folder you saved to on Android, and up to three recently used share apps on Android (stored as app identifiers, used to show quick-share shortcuts).</td></tr>
+              <tr><td>Temporary export files</td><td>PDF, JPEG or PNG files created when you share or save. They're held in the App's cache, which the operating system can clear.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-* Provide document and photo scanning functionality.
-* Process, enhance, and convert images.
-* Store and organize documents within the App.
-* Allow you to export and share files.
-* Maintain the stability, security, and performance of the App, where applicable.
+      <section id="en-permissions">
+        <h2><span class="n">3</span>Permissions</h2>
+        <h3>Camera</h3>
+        <p>Used to show the live viewfinder, detect the edges of the paper, and take pictures. Frames are analysed in memory on the device. Only the pictures you take are saved.</p>
+        <h3>Photos</h3>
+        <p>When you import from your gallery, Scannery uses the system photo picker and receives only the images you select. It can't browse the rest of your library.</p>
+        <h3>Folders you choose (Android)</h3>
+        <p>When you use <strong>Download</strong>, Android's folder picker gives Scannery access only to the folder you choose, so it can write exported files there. Scannery remembers that folder so the picker opens there next time.</p>
+        <p>You can revoke permissions at any time in your device settings. The related features will stop working until you grant access again, but everything else will keep working.</p>
+      </section>
 
-We do not use the contents of your scanned documents for advertising, profiling, or unrelated purposes.
+      <section id="en-ocr">
+        <h2><span class="n">4</span>Text recognition (Google ML Kit)</h2>
+        <p>Scannery reads text from your pages with <strong>Google ML Kit Text Recognition</strong>, a library that runs entirely on your device. Your images and the text recognised from them are <strong>not</strong> sent to Google or to us.</p>
+        <p>As part of how ML Kit works, the library may contact Google's servers to get updates, and it may send Google limited technical information about how the library itself performs. This can include the device model, operating system version, app identifier, library version and performance metrics. Google uses this information to maintain and improve ML Kit. It doesn't include your images or document contents. For details, see the <a href="https://developers.google.com/ml-kit/terms" rel="noopener">ML Kit Terms</a> and <a href="https://policies.google.com/privacy" rel="noopener">Google's Privacy Policy</a>.</p>
+        <p>Scannery does not include any other third-party SDKs that collect data.</p>
+      </section>
 
-## 4. Data Collection and Analytics
+      <section id="en-collect">
+        <h2><span class="n">5</span>What we don't collect</h2>
+        <p>We, the developer, don't collect or receive any personal data or usage data from the App. Specifically, Scannery has:</p>
+        <ul>
+          <li>no user accounts or sign-in;</li>
+          <li>no advertising or advertising identifiers;</li>
+          <li>no analytics, tracking or behavioural profiling;</li>
+          <li>no crash reporting or diagnostics sent to us;</li>
+          <li>no cloud sync or developer servers;</li>
+          <li>no sale or sharing of data with data brokers.</li>
+        </ul>
+        <p>If you email us, we receive your email address and whatever you write. We use it only to reply, and we delete the correspondence when it's no longer needed.</p>
+      </section>
 
-Scannery does not collect, track, or transmit personal data or technical usage information to the developer.
+      <section id="en-sharing">
+        <h2><span class="n">6</span>Sharing and saving files</h2>
+        <p>When you tap <strong>Share</strong>, Scannery creates the file in the format you choose and hands it to your operating system's share sheet. You pick the destination: email, messaging, cloud storage, printing and so on. When you use <strong>Download</strong>, the file is written to the folder you picked.</p>
+        <p>Once a file reaches another app or service, that app's own privacy policy and terms apply. Exported PDFs include the recognised text as an invisible, selectable layer, so anyone who receives the PDF can search and copy that text.</p>
+        <p>Scannery never shares your scans automatically, and it never sends them to us or to anyone else.</p>
+      </section>
 
-The application does not use:
+      <section id="en-backups">
+        <h2><span class="n">7</span>Device backups</h2>
+        <p>Depending on your device settings, your operating system may include Scannery's app data in your device backup, such as Android backup to your Google account or iCloud Backup on iOS. These backups are controlled by you and your platform provider under their terms. We can't access them. You can manage backups in your device settings.</p>
+      </section>
 
-* Analytics or user-tracking services.
-* Crash reporting or diagnostic tools.
-* Advertising SDKs.
-* Third-party services for collecting user data.
+      <section id="en-retention">
+        <h2><span class="n">8</span>Keeping and deleting your data</h2>
+        <p>Your scans and settings stay on your device until you delete them.</p>
+        <ul>
+          <li><strong>Delete a scan or page</strong> in the App to remove its originals, processed images and recognised text.</li>
+          <li><strong>Delete a folder</strong> to remove it and everything inside it. The App asks you to confirm first.</li>
+          <li><strong>Clear the App's storage</strong> in your device settings, or <strong>uninstall</strong> Scannery, to remove all of its data from the device.</li>
+        </ul>
+        <p>Files you've already shared or saved outside the App aren't affected. Manage them where you put them.</p>
+      </section>
 
-Scannery does not collect device identifiers, usage statistics, or behavioral data.
+      <section id="en-security">
+        <h2><span class="n">9</span>Security</h2>
+        <p>Your data is kept in the App's private storage, which other apps can't read, and it's never sent over the network by Scannery. Its protection also depends on your device, so we recommend using a screen lock and keeping your operating system up to date. Modern Android and iOS devices encrypt this storage by default. No method of storage is completely secure, but keeping your data on your device avoids the risks of sending it to a server.</p>
+      </section>
 
-All document scanning, image processing, and storage are performed locally on your device. No scanned content or personal information is transmitted to the developer or to external servers by Scannery.
+      <section id="en-legal">
+        <h2><span class="n">10</span>Legal basis (GDPR)</h2>
+        <p>Because your scans are processed only on your device and never reach us, we don't process them as a controller. Where the EU General Data Protection Regulation (GDPR) applies to us:</p>
+        <ul>
+          <li><strong>Emails you send us</strong> are processed on the basis of our legitimate interest in answering your request (Art. 6(1)(f)), or to take steps you've asked for (Art. 6(1)(b)).</li>
+          <li><strong>Device permissions</strong> (camera, photos, folders) are only used after you grant them through your operating system, and you can withdraw them at any time.</li>
+        </ul>
+      </section>
 
+      <section id="en-rights">
+        <h2><span class="n">11</span>Your rights</h2>
+        <p>Under the GDPR and other applicable laws, you have the right to access, correct, delete, restrict, object to, and port personal data we hold about you, and to withdraw consent at any time. In practice, the only personal data we might hold is correspondence you've sent us. Everything in the App is already under your control on your device.</p>
+        <p>To exercise your rights, email <a href="mailto:devsupport.address@gmail.com">devsupport.address@gmail.com</a>. We'll reply within one month.</p>
+        <p>You also have the right to lodge a complaint with a supervisory authority. In Portugal this is the <a href="https://www.cnpd.pt/" rel="noopener">Comissão Nacional de Proteção de Dados (CNPD)</a>. You can also contact the authority in your own EU country.</p>
+      </section>
 
-## 5. Sharing and Third-Party Services
+      <section id="en-children">
+        <h2><span class="n">12</span>Children</h2>
+        <p>Scannery is a general-purpose utility and isn't directed at children. We don't knowingly collect personal data from anyone, including children under 13, or under 16 where local law sets that age. If you believe a child has sent us personal data, for example by email, contact us and we'll delete it.</p>
+      </section>
 
-Scannery allows you to share or export documents using applications and services available on your device, such as email, messaging applications, and cloud storage providers.
+      <section id="en-transfers">
+        <h2><span class="n">13</span>International transfers</h2>
+        <p>We don't transfer your scans anywhere. Technical information that Google ML Kit may send (see <a href="#en-ocr">section 4</a>) is handled by Google, which may process it outside the European Economic Area under its own safeguards, such as the EU Standard Contractual Clauses and the EU–U.S. Data Privacy Framework.</p>
+      </section>
 
-When you initiate a sharing action, the selected file is transferred to the destination you choose. That transfer is governed by the privacy policy and terms of the receiving service.
+      <section id="en-changes">
+        <h2><span class="n">14</span>Changes to this policy</h2>
+        <p>If Scannery changes in a way that affects your privacy, for example if we add cloud sync, we'll update this page before the change is released and update the effective date at the top. For significant changes, we'll also tell you in the App or in the store listing.</p>
+      </section>
 
-Scannery does not automatically share your scanned documents or photographs with the developer or third parties.
+      <section id="en-contact">
+        <h2><span class="n">15</span>Contact</h2>
+        <p>For questions or requests about this policy or your data, contact:</p>
+        <div class="contact">
+          <dl>
+            <dt>Developer</dt><dd>Sérgio Valentim</dd>
+            <dt>Email</dt><dd><a href="mailto:devsupport.address@gmail.com">devsupport.address@gmail.com</a></dd>
+            <dt>Country</dt><dd>Portugal</dd>
+          </dl>
+        </div>
+      </section>
+    </article>
+  </div>
+</main>
 
-If third-party analytics, crash reporting, cloud storage, or other SDKs are integrated into the App, their relevant data processing practices and providers will be identified in this Privacy Policy.
+<!-- ============================ PORTUGUÊS ============================ -->
+<main id="pt" lang="pt-PT" class="wrap" hidden>
+  <div class="hero">
+    <p class="eyebrow">Política de Privacidade</p>
+    <h1>As suas digitalizações ficam no seu telemóvel.</h1>
+    <p class="lede">O Scannery é um digitalizador de documentos e fotografias. Não tem contas nem servidores e não envia as suas digitalizações para lado nenhum. Esta política explica o que a aplicação trata, onde fica guardado e que escolhas tem.</p>
+    <div class="meta">
+      <span>Em vigor: 30 de setembro de 2026</span>
+      <span>Aplica-se ao Scannery para Android e iOS</span>
+    </div>
+  </div>
 
-## 6. Legal Basis for Processing
+  <div class="glance" aria-label="Resumo">
+    <div class="card">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
+      <h3>Processado no dispositivo</h3>
+      <p>A deteção de margens, a melhoria de imagem, o reconhecimento de texto e a criação de PDF acontecem no telemóvel.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M3 3l18 18"/></svg></div>
+      <h3>Sem conta, sem rastreio</h3>
+      <p>Sem registo, sem anúncios, sem estatísticas de utilização e sem relatórios de erros enviados para nós.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg></div>
+      <h3>Decide o que sai</h3>
+      <p>Um ficheiro só sai do Scannery quando o partilha ou guarda numa pasta que escolher.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></div>
+      <h3>Apague quando quiser</h3>
+      <p>Apague uma digitalização ou pasta na aplicação, ou desinstale-a para remover tudo.</p>
+    </div>
+  </div>
 
-Where the General Data Protection Regulation (GDPR) applies, personal data is processed, where relevant, on the following legal bases:
+  <div class="layout">
+    <nav class="toc" aria-label="Índice">
+      <p>Índice</p>
+      <ol>
+        <li><a href="#pt-who">Quem somos</a></li>
+        <li><a href="#pt-stored">O que a aplicação guarda</a></li>
+        <li><a href="#pt-permissions">Permissões</a></li>
+        <li><a href="#pt-ocr">Reconhecimento de texto (Google ML Kit)</a></li>
+        <li><a href="#pt-collect">O que não recolhemos</a></li>
+        <li><a href="#pt-sharing">Partilhar e guardar</a></li>
+        <li><a href="#pt-backups">Cópias de segurança</a></li>
+        <li><a href="#pt-retention">Conservação e eliminação</a></li>
+        <li><a href="#pt-security">Segurança</a></li>
+        <li><a href="#pt-legal">Fundamento jurídico (RGPD)</a></li>
+        <li><a href="#pt-rights">Os seus direitos</a></li>
+        <li><a href="#pt-children">Crianças</a></li>
+        <li><a href="#pt-transfers">Transferências internacionais</a></li>
+        <li><a href="#pt-changes">Alterações a esta política</a></li>
+        <li><a href="#pt-contact">Contacto</a></li>
+      </ol>
+    </nav>
 
-* **Performance of a contract:** Processing necessary to provide the scanning, document management, and export features you request.
-* **Legitimate interests:** Processing necessary to maintain the security, reliability, and performance of the App, where applicable and where those interests are not overridden by your rights.
-* **Consent:** Where consent is required, such as for certain optional data collection or permissions, processing will take place based on your consent, which you may withdraw at any time.
+    <article>
+      <section id="pt-who">
+        <h2><span class="n">1</span>Quem somos</h2>
+        <p>O Scannery ("a Aplicação") é desenvolvido por <strong>Sérgio Valentim</strong>, programador independente em Portugal ("nós"). Somos o responsável pelo tratamento de quaisquer dados pessoais tratados no âmbito da Aplicação, conforme descrito nesta política.</p>
+        <p>O Scannery permite digitalizar documentos em papel e fotografias com a câmara ou importá-los da galeria, melhorá-los, organizá-los em pastas, pesquisar o seu texto e exportá-los em PDF, JPEG ou PNG.</p>
+      </section>
 
-The applicable legal basis depends on the specific processing activity.
+      <section id="pt-stored">
+        <h2><span class="n">2</span>O que a aplicação guarda, e onde</h2>
+        <p>O que digitaliza pode conter dados pessoais, como nomes, moradas, números de identificação, dados bancários ou de saúde, conforme o que escolher digitalizar. O Scannery guarda tudo na sua área de armazenamento privada, no seu dispositivo. Não temos servidores e nunca recebemos, vemos ou guardamos as suas digitalizações.</p>
+        <div class="callout">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          <p>Nada da tabela abaixo nos é enviado. Tudo fica no armazenamento da Aplicação, no seu dispositivo, até o apagar.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Dados</th><th>Porque são guardados</th></tr></thead>
+            <tbody>
+              <tr><td>Fotografias originais</td><td>A imagem da câmara ou da galeria, sem alterações, por trás de cada página. São guardadas para poder alterar o recorte ou o estilo mais tarde sem voltar a digitalizar.</td></tr>
+              <tr><td>Páginas processadas</td><td>As versões recortadas, endireitadas e melhoradas que vê na Aplicação, bem como pré-visualizações e miniaturas em cache.</td></tr>
+              <tr><td>Definições de edição</td><td>Os cantos do recorte, a rotação, a ordem das páginas e o estilo escolhido (por exemplo, "P&amp;B melhorado" ou "Restaurar") de cada página.</td></tr>
+              <tr><td>Texto reconhecido</td><td>Texto lido nas suas páginas por OCR no dispositivo. É usado para pesquisar na biblioteca, para sugerir um nome para a digitalização e como camada de texto selecionável nos PDF exportados.</td></tr>
+              <tr><td>Informação da biblioteca</td><td>Nomes das digitalizações e pastas, a estrutura de pastas, datas de criação e alteração e número de páginas.</td></tr>
+              <tr><td>Preferências</td><td>Tema, formato e qualidade de exportação predefinidos, captura automática, vista e ordenação da biblioteca, a última pasta onde guardou (Android) e até três aplicações de partilha usadas recentemente (Android), guardadas como identificadores de aplicação para mostrar atalhos de partilha rápida.</td></tr>
+              <tr><td>Ficheiros de exportação temporários</td><td>Ficheiros PDF, JPEG ou PNG criados quando partilha ou guarda. Ficam na cache da Aplicação, que o sistema operativo pode limpar.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-## 7. Data Security
+      <section id="pt-permissions">
+        <h2><span class="n">3</span>Permissões</h2>
+        <h3>Câmara</h3>
+        <p>Usada para mostrar a imagem em direto, detetar as margens do papel e tirar fotografias. As imagens são analisadas em memória, no dispositivo. Só são guardadas as fotografias que tirar.</p>
+        <h3>Fotografias</h3>
+        <p>Quando importa da galeria, o Scannery usa o seletor de fotografias do sistema e recebe apenas as imagens que selecionar. Não consegue ver o resto da sua galeria.</p>
+        <h3>Pastas que escolher (Android)</h3>
+        <p>Quando usa <strong>Transferir</strong>, o seletor de pastas do Android dá ao Scannery acesso apenas à pasta que escolher, para lá gravar os ficheiros exportados. O Scannery memoriza essa pasta para que o seletor abra lá da próxima vez.</p>
+        <p>Pode revogar as permissões a qualquer momento nas definições do dispositivo. As funcionalidades relacionadas deixam de funcionar até voltar a dar acesso, mas tudo o resto continua a funcionar.</p>
+      </section>
 
-We take reasonable technical and organizational measures to protect information handled by Scannery against unauthorized access, alteration, disclosure, or destruction.
+      <section id="pt-ocr">
+        <h2><span class="n">4</span>Reconhecimento de texto (Google ML Kit)</h2>
+        <p>O Scannery lê o texto das suas páginas com o <strong>Google ML Kit Text Recognition</strong>, uma biblioteca que funciona inteiramente no seu dispositivo. As suas imagens e o texto reconhecido <strong>não</strong> são enviados à Google nem a nós.</p>
+        <p>Pelo seu funcionamento, a biblioteca ML Kit pode contactar os servidores da Google para obter atualizações e pode enviar à Google informação técnica limitada sobre o desempenho da própria biblioteca. Esta informação pode incluir o modelo do dispositivo, a versão do sistema operativo, o identificador da aplicação, a versão da biblioteca e métricas de desempenho. A Google usa esta informação para manter e melhorar o ML Kit. Não inclui as suas imagens nem o conteúdo dos seus documentos. Para mais detalhes, consulte os <a href="https://developers.google.com/ml-kit/terms" rel="noopener">Termos do ML Kit</a> e a <a href="https://policies.google.com/privacy?hl=pt-PT" rel="noopener">Política de Privacidade da Google</a>.</p>
+        <p>O Scannery não inclui outros SDK de terceiros que recolham dados.</p>
+      </section>
 
-Where documents are stored locally, their security also depends on your device's security features, such as screen locks, operating system protections, and encryption.
+      <section id="pt-collect">
+        <h2><span class="n">5</span>O que não recolhemos</h2>
+        <p>Nós, o programador, não recolhemos nem recebemos quaisquer dados pessoais ou dados de utilização da Aplicação. Concretamente, o Scannery não tem:</p>
+        <ul>
+          <li>contas de utilizador nem início de sessão;</li>
+          <li>publicidade nem identificadores de publicidade;</li>
+          <li>estatísticas de utilização, rastreio nem criação de perfis;</li>
+          <li>relatórios de erros ou diagnósticos enviados para nós;</li>
+          <li>sincronização na nuvem nem servidores do programador;</li>
+          <li>venda ou partilha de dados com terceiros.</li>
+        </ul>
+        <p>Se nos enviar um email, recebemos o seu endereço de email e o que escrever. Usamo-lo apenas para responder e apagamos a correspondência quando deixar de ser necessária.</p>
+      </section>
 
-No method of electronic storage or transmission can be guaranteed to be completely secure.
+      <section id="pt-sharing">
+        <h2><span class="n">6</span>Partilhar e guardar ficheiros</h2>
+        <p>Quando toca em <strong>Partilhar</strong>, o Scannery cria o ficheiro no formato escolhido e entrega-o ao menu de partilha do sistema operativo. É o utilizador que escolhe o destino: email, mensagens, armazenamento na nuvem, impressão, etc. Quando usa <strong>Transferir</strong>, o ficheiro é gravado na pasta que escolheu.</p>
+        <p>Assim que um ficheiro chega a outra aplicação ou serviço, aplicam-se a política de privacidade e os termos desse serviço. Os PDF exportados incluem o texto reconhecido numa camada invisível e selecionável, pelo que quem receber o PDF pode pesquisar e copiar esse texto.</p>
+        <p>O Scannery nunca partilha as suas digitalizações automaticamente e nunca as envia para nós nem para mais ninguém.</p>
+      </section>
 
-## 8. Your Data Protection Rights
+      <section id="pt-backups">
+        <h2><span class="n">7</span>Cópias de segurança do dispositivo</h2>
+        <p>Conforme as definições do seu dispositivo, o sistema operativo pode incluir os dados do Scannery na cópia de segurança do dispositivo, como a cópia de segurança do Android na sua conta Google ou o Backup do iCloud no iOS. Estas cópias são controladas por si e pelo fornecedor da plataforma, nos termos deste. Não temos acesso a elas. Pode gerir as cópias de segurança nas definições do dispositivo.</p>
+      </section>
 
-If personal data relating to you is processed and the GDPR applies, you may have the right to:
+      <section id="pt-retention">
+        <h2><span class="n">8</span>Conservação e eliminação dos seus dados</h2>
+        <p>As suas digitalizações e definições ficam no dispositivo até as apagar.</p>
+        <ul>
+          <li><strong>Apague uma digitalização ou página</strong> na Aplicação para remover os originais, as imagens processadas e o texto reconhecido.</li>
+          <li><strong>Apague uma pasta</strong> para a remover com tudo o que contém. A Aplicação pede confirmação antes.</li>
+          <li><strong>Limpe o armazenamento da Aplicação</strong> nas definições do dispositivo, ou <strong>desinstale</strong> o Scannery, para remover todos os seus dados do dispositivo.</li>
+        </ul>
+        <p>Os ficheiros que já partilhou ou guardou fora da Aplicação não são afetados. Gira-os onde os colocou.</p>
+      </section>
 
-* **Access:** Request information about the personal data we process about you.
-* **Rectification:** Request correction of inaccurate personal data.
-* **Erasure:** Request deletion of personal data in applicable circumstances.
-* **Restriction:** Request restriction of processing in certain circumstances.
-* **Data portability:** Receive certain personal data in a structured, commonly used, machine-readable format.
-* **Object:** Object to certain types of processing, where applicable.
-* **Withdraw consent:** Withdraw consent at any time where processing is based on consent.
+      <section id="pt-security">
+        <h2><span class="n">9</span>Segurança</h2>
+        <p>Os seus dados ficam no armazenamento privado da Aplicação, que as outras aplicações não conseguem ler, e o Scannery nunca os envia pela rede. A sua proteção depende também do dispositivo, por isso recomendamos usar um bloqueio de ecrã e manter o sistema operativo atualizado. Os dispositivos Android e iOS atuais encriptam este armazenamento por predefinição. Nenhum método de armazenamento é totalmente seguro, mas manter os dados no dispositivo evita os riscos de os enviar para um servidor.</p>
+      </section>
 
-To exercise your rights, contact us at devsupport.address@gmail.com
+      <section id="pt-legal">
+        <h2><span class="n">10</span>Fundamento jurídico (RGPD)</h2>
+        <p>Como as suas digitalizações são processadas apenas no seu dispositivo e nunca chegam até nós, não as tratamos como responsável pelo tratamento. Quando o Regulamento Geral sobre a Proteção de Dados (RGPD) se aplica a nós:</p>
+        <ul>
+          <li><strong>Os emails que nos enviar</strong> são tratados com base no nosso interesse legítimo em responder ao seu pedido (art. 6.º, n.º 1, al. f)) ou para diligências a seu pedido (art. 6.º, n.º 1, al. b)).</li>
+          <li><strong>As permissões do dispositivo</strong> (câmara, fotografias, pastas) só são usadas depois de as conceder através do sistema operativo, e pode retirá-las a qualquer momento.</li>
+        </ul>
+      </section>
 
-We will respond to requests in accordance with applicable data protection laws. You also have the right to lodge a complaint with the Portuguese Data Protection Authority (Comissão Nacional de Proteção de Dados — CNPD) at https://www.cnpd.pt/.
+      <section id="pt-rights">
+        <h2><span class="n">11</span>Os seus direitos</h2>
+        <p>Nos termos do RGPD e de outras leis aplicáveis, tem direito de acesso, retificação, apagamento, limitação, oposição e portabilidade dos dados pessoais que tenhamos sobre si, bem como de retirar o consentimento a qualquer momento. Na prática, os únicos dados pessoais que poderemos ter são a correspondência que nos enviar. Tudo o que está na Aplicação já está sob o seu controlo, no seu dispositivo.</p>
+        <p>Para exercer os seus direitos, envie um email para <a href="mailto:devsupport.address@gmail.com">devsupport.address@gmail.com</a>. Respondemos no prazo de um mês.</p>
+        <p>Tem também o direito de apresentar reclamação a uma autoridade de controlo. Em Portugal, é a <a href="https://www.cnpd.pt/" rel="noopener">Comissão Nacional de Proteção de Dados (CNPD)</a>. Pode também contactar a autoridade do seu país da UE.</p>
+      </section>
 
-Where documents are stored exclusively on your device and are not accessible to us, you can manage or delete them directly within the App or through your device's storage settings.
+      <section id="pt-children">
+        <h2><span class="n">12</span>Crianças</h2>
+        <p>O Scannery é uma ferramenta de uso geral e não se dirige a crianças. Não recolhemos intencionalmente dados pessoais de ninguém, incluindo crianças com menos de 13 anos, ou de 16 anos quando a lei local fixar essa idade. Se acredita que uma criança nos enviou dados pessoais, por exemplo por email, contacte-nos e iremos apagá-los.</p>
+      </section>
 
-## 9. Children's Privacy
+      <section id="pt-transfers">
+        <h2><span class="n">13</span>Transferências internacionais</h2>
+        <p>Não transferimos as suas digitalizações para lado nenhum. A informação técnica que o Google ML Kit pode enviar (ver <a href="#pt-ocr">secção 4</a>) é tratada pela Google, que a pode tratar fora do Espaço Económico Europeu com as suas próprias garantias, como as Cláusulas Contratuais-Tipo da UE e o Quadro de Privacidade de Dados UE-EUA.</p>
+      </section>
 
-Scannery is not specifically designed to target children. We do not knowingly collect personal data from children for purposes unrelated to the App's functionality.
+      <section id="pt-changes">
+        <h2><span class="n">14</span>Alterações a esta política</h2>
+        <p>Se o Scannery mudar de forma que afete a sua privacidade, por exemplo se acrescentarmos sincronização na nuvem, atualizaremos esta página antes de a alteração ser lançada e atualizaremos a data de entrada em vigor no topo. Nas alterações importantes, avisaremos também na Aplicação ou na página da loja.</p>
+      </section>
 
-If you believe that personal data has been collected from a child in a manner that violates applicable laws, please contact us so that we can investigate and take appropriate action.
+      <section id="pt-contact">
+        <h2><span class="n">15</span>Contacto</h2>
+        <p>Para questões ou pedidos sobre esta política ou os seus dados, contacte:</p>
+        <div class="contact">
+          <dl>
+            <dt>Programador</dt><dd>Sérgio Valentim</dd>
+            <dt>Email</dt><dd><a href="mailto:devsupport.address@gmail.com">devsupport.address@gmail.com</a></dd>
+            <dt>País</dt><dd>Portugal</dd>
+          </dl>
+        </div>
+      </section>
+    </article>
+  </div>
+</main>
 
-## 10. International Data Transfers
+<footer>
+  <div class="wrap">
+    <span>© 2026 Sérgio Valentim · Scannery</span>
+    <a href="mailto:devsupport.address@gmail.com">devsupport.address@gmail.com</a>
+  </div>
+</footer>
 
-If Scannery processes personal data through third-party services located outside the European Economic Area (EEA), any applicable international transfers will be carried out in accordance with relevant data protection legislation, including the GDPR.
+<script>
+(function () {
+  var buttons = document.querySelectorAll('.lang button');
+  var pages = { en: document.getElementById('en'), pt: document.getElementById('pt') };
 
-Details of any such transfers and applicable safeguards will be provided where relevant.
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
-## 11. Changes to This Privacy Policy
+  function setLang(lang, save) {
+    if (!pages[lang]) lang = 'en';
+    for (var k in pages) pages[k].hidden = k !== lang;
+    buttons.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.lang === lang ? 'true' : 'false'); });
+    document.documentElement.lang = lang === 'pt' ? 'pt-PT' : 'en';
+    document.title = lang === 'pt' ? 'Política de Privacidade do Scannery' : 'Scannery Privacy Policy';
+    if (save) store('scannery.lang', lang);
+    observe(pages[lang]);
+  }
 
-We may update this Privacy Policy from time to time to reflect changes to the App, its functionality, or applicable legal requirements.
+  // Highlight the current section in the table of contents.
+  var observer;
+  function observe(page) {
+    if (!('IntersectionObserver' in window)) return;
+    if (observer) observer.disconnect();
+    var links = page.querySelectorAll('nav.toc a');
+    observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+      });
+    }, { rootMargin: '-90px 0px -65% 0px' });
+    page.querySelectorAll('article section').forEach(function (s) { observer.observe(s); });
+  }
 
-Any updated version will be made available at the same public URL, with the revised date indicated at the top of the policy.
+  buttons.forEach(function (b) { b.addEventListener('click', function () { setLang(b.dataset.lang, true); }); });
 
-We encourage you to review this Privacy Policy periodically.
-
-## 12. Contact
-
-If you have any questions, concerns, or requests regarding this Privacy Policy or the processing of your personal data, please contact:
-
-**Sérgio Valentim**
-**Email:** devsupport.address@gmail.com
-**Country:** Portugal
+  // Priority: ?lang= / #pt-… in the URL, then saved choice, then browser language.
+  var q = (location.search.match(/[?&]lang=(en|pt)/) || [])[1];
+  var h = (location.hash.match(/^#(en|pt)-/) || [])[1];
+  var nav = (navigator.language || '').toLowerCase().indexOf('pt') === 0 ? 'pt' : 'en';
+  setLang(q || h || load('scannery.lang') || nav, false);
+  if (h) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+})();
+</script>
+</body>
+</html>
