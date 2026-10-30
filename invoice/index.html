@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Questrial&family=Didact+Gothic&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #5e5b96;
+    --navy: #1d3451;
+    --green: #83b29b;
+    --fill: #e6efea;
+    --font: "Century Gothic", CenturyGothic, "Questrial", "Didact Gothic", AppleGothic, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eef0f3; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #222; }
+
+  /* ---------- Layout ---------- */
+  .app { display: grid; grid-template-columns: 420px 1fr; gap: 24px; padding: 24px; align-items: start; }
+  @media (max-width: 1100px) { .app { grid-template-columns: 1fr; } }
+
+  /* ---------- Editor ---------- */
+  .editor { background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08); position: sticky; top: 24px; max-height: calc(100vh - 48px); overflow: auto; }
+  .editor h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--purple); margin: 18px 0 8px; border-bottom: 1px solid #e3e3e8; padding-bottom: 4px; }
+  .editor h2:first-of-type { margin-top: 4px; }
+  .editor label { display: block; font-size: 12px; color: #555; margin: 8px 0 3px; }
+  .editor input, .editor textarea, .editor select { width: 100%; font: inherit; font-size: 14px; padding: 6px 8px; border: 1px solid #cfd3da; border-radius: 6px; }
+  .editor textarea { resize: vertical; min-height: 58px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .items { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .items th { text-align: left; font-weight: 600; color: #555; font-size: 11px; padding: 2px 3px; }
+  .items td { padding: 2px 3px; }
+  .items input { padding: 5px 6px; font-size: 13px; }
+  .items td.num input { text-align: right; }
+  .items .del { border: 0; background: none; color: #b33; cursor: pointer; font-size: 16px; padding: 0 4px; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  button.b { font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 6px; border: 1px solid #cfd3da; background: #f7f8fa; cursor: pointer; }
+  button.b:hover { background: #eceef2; }
+  button.primary { background: var(--purple); border-color: var(--purple); color: #fff; }
+  button.primary:hover { background: #4d4a82; }
+  .hint { font-size: 11.5px; color: #777; margin-top: 4px; line-height: 1.4; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: .95; }
+
+  /* ---------- Invoice (matches template) ---------- */
+  .paper { background: #fff; width: 8.5in; height: 11in; margin: 0 auto; padding: 0 0.75in; position: relative; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.12); font-family: var(--font); color: var(--navy); font-size: 9pt; letter-spacing: .06em; font-synthesis: weight style; }
+  .paper > * { position: absolute; left: 0.75in; right: 0.75in; }
+  .lbl { color: var(--purple); font-weight: 700; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .1em; }
+  .inv-name { top: 0.98in; text-align: center; color: var(--purple); font-size: 29pt; line-height: 1; text-transform: uppercase; font-weight: 400; letter-spacing: .02em; white-space: nowrap; }
+  .inv-title { top: 1.62in; text-align: center; color: var(--purple); font-size: 22pt; line-height: 1; text-transform: uppercase; font-weight: 700; letter-spacing: .03em; }
+  .inv-hr { top: 2.04in; border-top: 1px solid #8f8db0; height: 0; }
+  .meta { top: 2.27in; height: 1.6in; }
+  .meta-left { position: absolute; left: 0.08in; top: 0; }
+  .meta-left .val { margin: 3px 0 0; height: 0.32in; }
+  .meta-right { position: absolute; left: 4.45in; top: 0; display: flex; gap: 0.3in; }
+  .client-name { font-weight: 700; font-size: 10pt; margin-top: -1px; margin-bottom: 2px; letter-spacing: .03em; }
+  .client-addr { line-height: 1.5; white-space: pre-line; }
+
+  .hdr { display: flex; height: 0.2in; align-items: center; }
+  .hdr > div { padding-left: 0.08in; }
+  .job-hdr { top: 4.15in; }
+  .job-hdr > div:nth-child(1), table.job col:nth-child(1) { width: 2.92in; }
+  .job-hdr > div:nth-child(2), table.job col:nth-child(2) { width: 2.535in; }
+  table.inv { border-collapse: collapse; table-layout: fixed; width: 7in; }
+  table.inv td { border: 1px solid var(--green); padding: 0 0.07in; white-space: nowrap; overflow: hidden; }
+  table.job { top: 4.39in; }
+  table.job td { background: var(--fill); height: 0.38in; border-bottom-width: 2.5px; }
+  .lines-hdr { top: 5.0in; }
+  .lines-hdr > div:nth-child(1) { width: 3.7in; }
+  .lines-hdr > div:not(:first-child) { width: 1.1in; text-align: center; padding-left: 0; }
+  table.lines { top: 5.205in; }
+  table.lines col.c1 { width: 3.7in; }
+  table.lines td { height: 0.283in; }
+  table.lines td.c { text-align: center; }
+  table.sum { top: 8.595in; left: auto; right: 0.75in; width: 2.2in; border-collapse: collapse; table-layout: fixed; }
+  table.sum td { height: 0.3in; padding: 0 0.07in; }
+  table.sum td.k { width: 1.1in; line-height: 1.25; }
+  table.sum td.v { background: var(--fill); border: 1px solid var(--green); border-top-width: 2.5px; border-bottom-width: 2.5px; text-align: right; font-weight: 700; }
+  table.sum tr:first-child td.v { border-top-width: 1px; }
+  .thanks { top: 10.06in; text-align: center; color: var(--purple); font-size: 9pt; }
+
+  @page { size: letter; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    .editor, .toast { display: none !important; }
+    .app { display: block; padding: 0; }
+    .paper { box-shadow: none; margin: 0; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== EDITOR ===================== -->
+  <aside class="editor">
+    <div class="btns" style="margin-top:0">
+      <button class="b primary" id="printBtn" title="Choose 'Save as PDF' as the printer">Print / Save as PDF</button>
+      <button class="b" id="newBtn" title="Next invoice number, today's date, clears the line items">New invoice</button>
+    </div>
+    <p class="hint">In the print dialog choose <b>Save as PDF</b>, paper size <b>Letter</b>, and turn <b>Headers and footers</b> off. Everything you type is saved automatically in this browser.</p>
+
+    <h2>You</h2>
+    <label>Your name (header)</label>
+    <input id="f_name" placeholder="Your full name">
+
+    <h2>Invoice</h2>
+    <div class="row2">
+      <div><label>Date</label><input type="date" id="f_date"></div>
+      <div><label>Invoice #</label><input id="f_number"></div>
+    </div>
+    <div class="row2">
+      <div><label>Payment terms</label><input id="f_terms" list="termsList"></div>
+      <div><label>Due date</label><input type="date" id="f_due"></div>
+    </div>
+    <datalist id="termsList"><option>Net 15</option><option>Net 30</option><option>Net 45</option><option>Net 60</option><option>Due on receipt</option></datalist>
+    <p class="hint">The due date is filled in from the terms ("Net 30" = date + 30 days). You can still change it by hand.</p>
+    <label>Job</label>
+    <input id="f_job" placeholder="e.g. Software Development">
+
+    <h2>Bill to</h2>
+    <label>Client name</label>
+    <input id="f_client" placeholder="Client or company name">
+    <label>Client address</label>
+    <textarea id="f_addr" placeholder="Street / P.O. Box&#10;City, State ZIP"></textarea>
+
+    <h2>Line items</h2>
+    <table class="items">
+      <thead><tr><th style="width:52%">Description</th><th>Hours</th><th>Rate</th><th></th></tr></thead>
+      <tbody id="itemsBody"></tbody>
+    </table>
+    <div class="btns">
+      <button class="b" id="addRowBtn">+ Add row</button>
+      <button class="b" id="clearRowsBtn">Clear rows</button>
+    </div>
+
+    <label style="margin-top:14px">Auto-fill weekly rows for a month</label>
+    <div class="row3">
+      <div><input type="month" id="g_month"></div>
+      <div><input type="number" id="g_hours" step="0.25" title="Hours per weekday"></div>
+      <div><button class="b" id="genBtn" style="width:100%">Fill weeks</button></div>
+    </div>
+    <p class="hint">Creates one row per Mon–Fri week in that month ("Development work 08/03-08/07", 40 h), using the hours per day and the default rate below.</p>
+    <div class="row2">
+      <div><label>Row description prefix</label><input id="g_prefix"></div>
+      <div><label>Default rate ($/h)</label><input type="number" id="g_rate" step="0.01" placeholder="e.g. 50.00"></div>
+    </div>
+
+    <h2>Totals</h2>
+    <div class="row2">
+      <div><label>Sales tax (%)</label><input type="number" id="f_tax" step="0.01"></div>
+      <div><label>Minimum table rows</label><input type="number" id="f_minRows" min="0" max="11"></div>
+    </div>
+    <p class="hint">Empty rows pad the table like the template. 11 matches your invoice (12 rows including the hours total). Up to 11 line items fit on the page.</p>
+    <label>Footer message</label>
+    <input id="f_thanks">
+
+    <h2>Backup</h2>
+    <div class="btns" style="margin-top:0">
+      <button class="b" id="exportBtn">Export data (.json)</button>
+      <button class="b" id="importBtn">Import data</button>
+      <input type="file" id="importFile" accept="application/json" hidden>
+    </div>
+  </aside>
+
+  <!-- ===================== INVOICE ===================== -->
+  <main>
+    <div class="paper" id="paper">
+      <div class="inv-name" id="p_name"></div>
+      <div class="inv-title">Invoice</div>
+      <div class="inv-hr"></div>
+
+      <div class="meta">
+        <div class="meta-left">
+          <div class="lbl">Date:</div>
+          <div class="val" id="p_date"></div>
+          <div class="lbl">Invoice #</div>
+          <div class="val" id="p_number"></div>
+          <div class="lbl">Due Date:</div>
+          <div class="val" id="p_due"></div>
+        </div>
+        <div class="meta-right">
+          <div class="lbl">To:</div>
+          <div>
+            <div class="client-name" id="p_client"></div>
+            <div class="client-addr" id="p_addr"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hdr job-hdr"><div class="lbl">Job</div><div class="lbl">Payment Terms</div><div class="lbl">Due Date</div></div>
+      <table class="inv job">
+        <colgroup><col><col><col></colgroup>
+        <tr><td id="p_job"></td><td id="p_terms"></td><td id="p_due2"></td></tr>
+      </table>
+
+      <div class="hdr lines-hdr"><div class="lbl">Description</div><div class="lbl"># Hours</div><div class="lbl">Rate</div><div class="lbl">Line Total</div></div>
+      <table class="inv lines">
+        <colgroup><col class="c1"><col><col><col></colgroup>
+        <tbody id="p_lines"></tbody>
+      </table>
+
+      <table class="sum">
+        <tr><td class="k lbl">Total</td><td class="v" id="p_total"></td></tr>
+        <tr><td class="k lbl">Sales Tax</td><td class="v" id="p_tax"></td></tr>
+        <tr><td class="k lbl">Balance<br>Due:</td><td class="v" id="p_balance"></td></tr>
+      </table>
+
+      <div class="thanks" id="p_thanks"></div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const KEY = "invoice-generator-v1";
+  const $ = id => document.getElementById(id);
+
+  const today = () => toISO(new Date());
+  function toISO(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function parseISO(s) { if (!s) return null; const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
+  function fmtDate(s) { const d = parseISO(s); if (!d) return ""; return String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getDate()).padStart(2, "0") + "/" + d.getFullYear(); }
+  function fmtShort(s) { const f = fmtDate(s); return f ? f.slice(0, 6) + f.slice(8) : ""; }
+  function mmdd(d) { return String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getDate()).padStart(2, "0"); }
+  function num(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
+  const money = n => "$" + (Number.isInteger(Math.round(n * 100) / 100) ? String(Math.round(n)) : n.toFixed(2));
+  const rateFmt = n => "$" + n.toFixed(2);
+  const plain = n => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const hrs = n => (Math.round(n * 100) / 100).toString();
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  const defaults = {
+    name: "",
+    date: today(),
+    number: "1",
+    terms: "Net 30",
+    due: "",
+    job: "",
+    client: "",
+    addr: "",
+    items: [],
+    tax: 0,
+    minRows: 11,
+    thanks: "Thank you for your business!",
+    prefix: "Development work",
+    rate: "",
+    hoursPerDay: 8,
+  };
+
+  let state;
+  try { state = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || "{}")); }
+  catch (e) { state = Object.assign({}, defaults); }
+  if (!state.due) state.due = dueFromTerms(state.date, state.terms) || state.date;
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("show"), 1800); }
+
+  function dueFromTerms(dateISO, terms) {
+    const d = parseISO(dateISO); if (!d) return null;
+    if (/receipt/i.test(terms || "")) return dateISO;
+    const m = /(\d+)/.exec(terms || ""); if (!m) return null;
+    d.setDate(d.getDate() + parseInt(m[1], 10));
+    return toISO(d);
+  }
+
+  // ---------- simple fields ----------
+  const fields = { f_name: "name", f_date: "date", f_number: "number", f_terms: "terms", f_due: "due", f_job: "job",
+                   f_client: "client", f_addr: "addr", f_tax: "tax", f_minRows: "minRows", f_thanks: "thanks",
+                   g_prefix: "prefix", g_rate: "rate", g_hours: "hoursPerDay" };
+  function fillForm() {
+    for (const [id, k] of Object.entries(fields)) $(id).value = state[k];
+    renderItemsEditor();
+  }
+  for (const [id, k] of Object.entries(fields)) {
+    $(id).addEventListener("input", e => {
+      state[k] = e.target.value;
+      if (k === "date" || k === "terms") {
+        const d = dueFromTerms(state.date, state.terms);
+        if (d) { state.due = d; $("f_due").value = d; }
+      }
+      update();
+    });
+  }
+
+  // ---------- line items editor ----------
+  function renderItemsEditor() {
+    const body = $("itemsBody");
+    body.innerHTML = "";
+    state.items.forEach((it, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        `<td><input data-k="desc" value="${esc(it.desc)}"></td>` +
+        `<td class="num"><input data-k="hours" type="number" step="0.25" value="${esc(it.hours)}"></td>` +
+        `<td class="num"><input data-k="rate" type="number" step="0.01" value="${esc(it.rate)}"></td>` +
+        `<td><button class="del" title="Remove row">&times;</button></td>`;
+      tr.querySelectorAll("input").forEach(inp => inp.addEventListener("input", () => { it[inp.dataset.k] = inp.value; update(); }));
+      tr.querySelector(".del").addEventListener("click", () => { state.items.splice(i, 1); renderItemsEditor(); update(); });
+      body.appendChild(tr);
+    });
+  }
+  $("addRowBtn").onclick = () => { state.items.push({ desc: state.prefix + " ", hours: "", rate: state.rate }); renderItemsEditor(); update(); };
+  $("clearRowsBtn").onclick = () => { if (state.items.length && !confirm("Remove all line items?")) return; state.items = []; renderItemsEditor(); update(); };
+
+  // ---------- weekly generator ----------
+  function defaultMonth() { const d = parseISO(state.date) || new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); }
+  $("genBtn").onclick = () => {
+    const mv = $("g_month").value; if (!mv) return toast("Pick a month first");
+    const [y, m] = mv.split("-").map(Number);
+    const perDay = num(state.hoursPerDay);
+    const rows = [];
+    let week = null;
+    for (let d = new Date(y, m - 1, 1); d.getMonth() === m - 1; d.setDate(d.getDate() + 1)) {
+      const wd = d.getDay();
+      if (wd === 0 || wd === 6) { week = null; continue; }
+      if (!week) { week = { start: new Date(d), end: new Date(d), days: 0 }; rows.push(week); }
+      week.end = new Date(d); week.days++;
+    }
+    const items = rows.map(w => ({
+      desc: state.prefix + " " + (w.days === 1 ? mmdd(w.start) : mmdd(w.start) + "-" + mmdd(w.end)),
+      hours: hrs(w.days * perDay),
+      rate: state.rate,
+    }));
+    if (state.items.length && !confirm("Replace the current line items?")) return;
+    state.items = items;
+    renderItemsEditor(); update();
+    toast(items.length + " rows added — adjust any days off by editing hours");
+  };
+
+  // ---------- new / print / backup ----------
+  $("newBtn").onclick = () => {
+    if (!confirm("Start the next invoice? This increments the invoice #, sets today's date and clears line items.")) return;
+    const n = parseInt(state.number, 10);
+    state.number = isFinite(n) ? String(n + 1) : state.number;
+    state.date = today();
+    state.due = dueFromTerms(state.date, state.terms) || state.date;
+    state.items = [];
+    fillForm(); update();
+    $("g_month").value = defaultMonth();
+  };
+  $("printBtn").onclick = () => {
+    const old = document.title;
+    document.title = "Invoice " + state.number + " - " + (state.client || "");
+    window.print();
+    setTimeout(() => document.title = old, 500);
+  };
+  $("exportBtn").onclick = () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "invoice-" + state.number + ".json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  $("importBtn").onclick = () => $("importFile").click();
+  $("importFile").onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try { state = Object.assign({}, defaults, JSON.parse(await f.text())); fillForm(); update(); toast("Imported"); }
+    catch (err) { alert("That file could not be read: " + err.message); }
+    e.target.value = "";
+  };
+
+  // ---------- preview ----------
+  function update() {
+    $("p_name").textContent = state.name;
+    $("p_date").textContent = fmtDate(state.date);
+    $("p_number").textContent = state.number;
+    $("p_due").textContent = fmtShort(state.due);
+    $("p_due2").textContent = fmtShort(state.due);
+    $("p_job").textContent = state.job;
+    $("p_terms").textContent = state.terms;
+    $("p_client").textContent = state.client;
+    $("p_addr").textContent = state.addr;
+    $("p_thanks").textContent = state.thanks;
+
+    let totalHours = 0, total = 0, html = "";
+    for (const it of state.items) {
+      const h = num(it.hours), r = num(it.rate);
+      const hasNums = String(it.hours).trim() !== "" || String(it.rate).trim() !== "";
+      const line = Math.round(h * r * 100) / 100;
+      totalHours += h; total += line;
+      html += `<tr><td>${esc(it.desc)}</td><td class="c">${String(it.hours).trim() === "" ? "" : esc(hrs(h))}</td>` +
+              `<td class="c">${String(it.rate).trim() === "" ? "" : rateFmt(r)}</td><td class="c">${hasNums ? money(line) : ""}</td></tr>`;
+    }
+    const pad = Math.max(0, num(state.minRows) - state.items.length);
+    for (let i = 0; i < pad; i++) html += `<tr><td></td><td></td><td></td><td></td></tr>`;
+    html += `<tr><td></td><td class="c">${totalHours ? esc(hrs(totalHours)) : ""}</td><td></td><td></td></tr>`;
+    $("p_lines").innerHTML = html;
+
+    const tax = Math.round(total * num(state.tax)) / 100;
+    $("p_total").textContent = money(total);
+    $("p_tax").textContent = plain(tax);
+    $("p_balance").textContent = money(total + tax);
+    save();
+  }
+
+  fillForm();
+  $("g_month").value = defaultMonth();
+  update();
+})();
+</script>
+</body>
+</html>
