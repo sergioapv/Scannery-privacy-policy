@@ -6,48 +6,125 @@
 <title>Invoice Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Work+Sans:wght@300;400;500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Archivo+Narrow:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Work+Sans:wght@300;400;500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Archivo+Narrow:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
 <style>
   /* Century Gothic when installed, otherwise TeX Gyre Adventor (free look-alike with a real bold) */
   @font-face { font-family: "InvoiceGothic"; font-weight: 400; src: local("Century Gothic"), local("CenturyGothic"), url("fonts/texgyreadventor-regular.otf") format("opentype"); }
   @font-face { font-family: "InvoiceGothic"; font-weight: 700; src: local("Century Gothic Bold"), local("CenturyGothic-Bold"), url("fonts/texgyreadventor-bold.otf") format("opentype"); }
   :root {
+    /* Original invoice template */
     --purple: #5e5b96;
     --navy: #1d3451;
     --green: #83b29b;
     --fill: #e6efea;
     --font: "InvoiceGothic", "Century Gothic", sans-serif;
+    /* App chrome: quiet graphite workspace, the invoice's own purple as the single accent */
+    --ui-bg: #e9eaee;
+    --ui-panel: #ffffff;
+    --ui-ink: #17181c;
+    --ui-mute: #6a6e78;
+    --ui-line: #e1e3e8;
+    --ui-field: #f6f7f9;
+    --ui-accent: #5e5b96;
+    --ui-font: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --ui-mono: "Geist Mono", ui-monospace, monospace;
+    /* layout: fixed-height header, form column on the left, scaled sheet + template strip on the right */
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: #eef0f3; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #222; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--ui-bg); font-family: var(--ui-font); color: var(--ui-ink); font-size: 14px; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; }
 
-  /* ---------- Layout ---------- */
-  .app { display: grid; grid-template-columns: 420px 1fr; gap: 24px; padding: 24px; align-items: start; }
-  @media (max-width: 1100px) { .app { grid-template-columns: 1fr; } }
+  /* ---------- Header ---------- */
+  .bar { position: sticky; top: 0; z-index: 5; height: 60px; display: flex; align-items: center; gap: 20px; padding: 0 20px; background: var(--ui-panel); border-bottom: 1px solid var(--ui-line); }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
+  .brand i { width: 22px; height: 28px; border: 1.5px solid var(--ui-ink); border-radius: 3px; position: relative; display: block; }
+  .brand i::before, .brand i::after { content: ""; position: absolute; left: 4px; right: 4px; height: 1.5px; background: var(--ui-ink); top: 8px; box-shadow: 0 5px 0 var(--ui-ink); }
+  .brand i::after { top: auto; bottom: 4px; left: 9px; background: var(--ui-accent); box-shadow: none; height: 3px; }
+  .status { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 14px; overflow: hidden; white-space: nowrap; color: var(--ui-mute); font-size: 13px; }
+  .status b { color: var(--ui-ink); font-weight: 600; }
+  .status .amt { font-family: var(--ui-mono); color: var(--ui-ink); font-size: 15px; }
+  .status .sep { width: 1px; height: 14px; background: var(--ui-line); align-self: center; }
+  .actions { display: flex; gap: 8px; }
+  .btn { height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--ui-line); background: var(--ui-panel); cursor: pointer; font-size: 13.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .btn:hover { background: var(--ui-field); border-color: #cfd2d9; }
+  .btn.primary { background: var(--ui-ink); border-color: var(--ui-ink); color: #fff; }
+  .btn.primary:hover { background: #2c2e35; }
+  .btn.small { height: 30px; padding: 0 10px; font-size: 12.5px; }
+  .btn:focus-visible, .tpl:focus-visible, .field:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
 
-  /* ---------- Editor ---------- */
-  .editor { background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08); position: sticky; top: 24px; max-height: calc(100vh - 48px); overflow: auto; }
-  .editor h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--purple); margin: 18px 0 8px; border-bottom: 1px solid #e3e3e8; padding-bottom: 4px; }
-  .editor h2:first-of-type { margin-top: 4px; }
-  .editor label { display: block; font-size: 12px; color: #555; margin: 8px 0 3px; }
-  .editor input, .editor textarea, .editor select { width: 100%; font: inherit; font-size: 14px; padding: 6px 8px; border: 1px solid #cfd3da; border-radius: 6px; }
-  .editor textarea { resize: vertical; min-height: 58px; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  .items { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .items th { text-align: left; font-weight: 600; color: #555; font-size: 11px; padding: 2px 3px; }
-  .items td { padding: 2px 3px; }
-  .items input { padding: 5px 6px; font-size: 13px; }
-  .items td.num input { text-align: right; }
-  .items .del { border: 0; background: none; color: #b33; cursor: pointer; font-size: 16px; padding: 0 4px; }
-  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  button.b { font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 6px; border: 1px solid #cfd3da; background: #f7f8fa; cursor: pointer; }
-  button.b:hover { background: #eceef2; }
-  button.primary { background: var(--purple); border-color: var(--purple); color: #fff; }
-  button.primary:hover { background: #4d4a82; }
-  .hint { font-size: 11.5px; color: #777; margin-top: 4px; line-height: 1.4; }
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
-  .toast.show { opacity: .95; }
+  /* ---------- Workspace ---------- */
+  .app { display: grid; grid-template-columns: 400px 1fr; height: calc(100% - 60px); }
+  .editor { overflow: auto; background: var(--ui-panel); border-right: 1px solid var(--ui-line); padding: 6px 0 40px; }
+  .stage { overflow: auto; display: flex; flex-direction: column; min-width: 0; }
+
+  /* ---------- Form ---------- */
+  .sec { padding: 18px 22px 20px; border-bottom: 1px solid var(--ui-line); }
+  .sec:last-child { border-bottom: 0; }
+  .sec h2 { margin: 0 0 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ui-mute); display: flex; justify-content: space-between; align-items: baseline; }
+  .sec h2 small { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 12px; }
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .lbl-ui { display: block; font-size: 12.5px; font-weight: 500; margin: 0 0 5px; }
+  .field { width: 100%; font: inherit; font-size: 14px; height: 36px; padding: 0 10px; border: 1px solid var(--ui-line); border-radius: 8px; background: var(--ui-field); color: var(--ui-ink); transition: border-color .12s, background .12s; }
+  textarea.field { height: auto; min-height: 62px; padding: 8px 10px; resize: vertical; line-height: 1.4; }
+  .field:hover { border-color: #cfd2d9; }
+  .field:focus { outline: none; border-color: var(--ui-accent); background: #fff; box-shadow: 0 0 0 3px rgba(94, 91, 150, .14); }
+  .field.num { font-family: var(--ui-mono); font-size: 13px; text-align: right; }
+  .hint { font-size: 12px; color: var(--ui-mute); margin: 6px 0 0; line-height: 1.45; }
+
+  .items { display: flex; flex-direction: column; gap: 8px; }
+  .item { border: 1px solid var(--ui-line); border-radius: 10px; padding: 8px; display: grid; grid-template-columns: 72px 88px 1fr 28px; gap: 6px; align-items: center; background: #fff; }
+  .item .desc { grid-column: 1 / -1; }
+  .item .amt { font-family: var(--ui-mono); font-size: 13px; text-align: right; color: var(--ui-ink); padding-right: 2px; }
+  .item .amt small { display: block; font-family: var(--ui-font); font-size: 11px; color: var(--ui-mute); }
+  .item .x { width: 28px; height: 28px; border: 0; background: none; border-radius: 6px; cursor: pointer; color: var(--ui-mute); font-size: 18px; line-height: 1; }
+  .item .x:hover { background: #fbeceb; color: #b42318; }
+  .items-empty { border: 1px dashed #cfd2d9; border-radius: 10px; padding: 16px; text-align: center; color: var(--ui-mute); font-size: 13px; }
+  .row-btns { display: flex; gap: 8px; margin-top: 10px; }
+  .quick { margin-top: 14px; padding: 12px; border-radius: 10px; background: var(--ui-field); border: 1px solid var(--ui-line); }
+  .quick .qgrid { grid-template-columns: minmax(0, 1fr) 62px auto; align-items: end; }
+  .quick .qgrid .btn { padding: 0 12px; }
+  .totals { margin-top: 14px; border-top: 1px solid var(--ui-line); padding-top: 12px; display: grid; gap: 4px; font-size: 13px; }
+  .totals div { display: flex; justify-content: space-between; color: var(--ui-mute); }
+  .totals span:last-child { font-family: var(--ui-mono); color: var(--ui-ink); }
+  .totals .bal { margin-top: 4px; color: var(--ui-ink); font-weight: 600; }
+  .totals .bal span:last-child { font-size: 15px; }
+
+  /* ---------- Template strip ---------- */
+  .strip { position: sticky; top: 0; z-index: 2; background: rgba(233, 234, 238, .94); backdrop-filter: blur(6px); border-bottom: 1px solid var(--ui-line); padding: 12px 20px 10px; }
+  .strip-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; font-size: 12px; color: var(--ui-mute); }
+  .strip-h b { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  .tpls { display: flex; gap: 12px; overflow-x: auto; padding: 3px 3px 6px; scrollbar-width: thin; }
+  .tpl { flex: 0 0 auto; width: 92px; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; }
+  .thumb { display: block; width: 92px; height: 119px; position: relative; overflow: hidden; border-radius: 4px; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.08); transition: transform .15s, box-shadow .15s; }
+  .thumb .paper { position: absolute; left: 0; top: 0; margin: 0; transform: scale(0.11275); transform-origin: 0 0; box-shadow: none; pointer-events: none; }
+  .tpl:hover .thumb { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(0,0,0,.12), 0 6px 14px rgba(0,0,0,.12); }
+  .tpl[aria-checked="true"] .thumb { box-shadow: 0 0 0 2px var(--ui-accent), 0 6px 14px rgba(94, 91, 150, .25); }
+  .tpl .nm { display: block; margin-top: 7px; font-size: 12.5px; font-weight: 600; }
+  .tpl .ds { display: block; font-size: 11.5px; color: var(--ui-mute); }
+  .tpl[aria-checked="true"] .nm { color: var(--ui-accent); }
+
+  .sheet-area { flex: 1; padding: 28px 20px 48px; display: flex; justify-content: center; }
+  .sheet { position: relative; flex: 0 0 auto; }
+  .sheet > .paper { position: absolute; left: 0; top: 0; margin: 0; transform-origin: 0 0; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(23, 24, 28, .14); }
+
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 8px); background: var(--ui-ink); color: #fff; padding: 9px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 10; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 980px) {
+    .app { grid-template-columns: 1fr; height: auto; }
+    .editor { border-right: 0; overflow: visible; }
+    .stage { overflow: visible; }
+    .status .opt { display: none; }
+  }
+  @media (max-width: 560px) {
+    .bar { gap: 10px; padding: 0 12px; }
+    .brand span, .status { display: none; }
+    .actions { margin-left: auto; }
+    .sec { padding: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
   /* ---------- Invoice (matches template) ---------- */
   .paper { background: #fff; width: 8.5in; height: 11in; margin: 0 auto; position: relative; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
@@ -87,16 +164,6 @@
   table.sum tr:first-child td.v { border-top-width: 1px; }
   .thanks { top: 10.06in; text-align: center; color: var(--purple); font-size: 9pt; }
 
-
-  /* ---------- Template picker ---------- */
-  .tpls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .tpl { font: inherit; text-align: left; background: #fff; border: 1px solid #cfd3da; border-radius: 8px; padding: 0; cursor: pointer; overflow: hidden; }
-  .tpl:hover { border-color: #9aa0ab; }
-  .tpl:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
-  .tpl[aria-checked="true"] { border-color: var(--purple); box-shadow: 0 0 0 1.5px var(--purple); }
-  .tpl .sw { height: 38px; display: flex; align-items: center; padding: 0 9px; font-size: 17px; line-height: 1; }
-  .tpl .nm { display: block; padding: 6px 9px 0; font-size: 12.5px; font-weight: 600; color: #222; }
-  .tpl .ds { display: block; padding: 1px 9px 7px; font-size: 11px; color: #777; }
 
   /* ---------- Swiss (modern) ---------- */
   .t-swiss { --ink: #111214; --mute: #6d7179; --hair: #e3e3e6; --accent: #e4412b;
@@ -251,115 +318,237 @@
   .fm-foot .fm-rule { margin: 0 0 10px; height: 4px; border-top: 0.75px solid var(--navy); border-bottom: 2px solid var(--navy); }
   .fm-foot .thanks2 { font-style: italic; color: var(--navy); font-size: 12pt; }
 
+  /* ---------- Blueprint (technical drawing) ---------- */
+  .t-blueprint { --blue: #1d4f91; --blue-soft: rgba(29, 79, 145, .55); --grid: rgba(29, 79, 145, .07); --ink: #10233f;
+    font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--ink); font-size: 9pt;
+    background-color: #fff;
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 0.25in 0.25in; background-position: 0.4in 0.4in; }
+  .bp-frame { position: absolute; inset: 0.4in; border: 1.5px solid var(--blue); padding: 0.32in 0.34in 0; display: flex; flex-direction: column; }
+  .bp-frame::before { content: ""; position: absolute; inset: 4px; border: 0.5px solid var(--blue-soft); pointer-events: none; }
+  .bp-l { font-family: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif; font-weight: 600; font-size: 7pt; letter-spacing: 0.14em; text-transform: uppercase; color: var(--blue); }
+  .bp-head { display: flex; justify-content: space-between; align-items: flex-end; }
+  .bp-head h1 { margin: 0; font-family: "IBM Plex Sans Condensed", sans-serif; font-weight: 700; font-size: 34pt; letter-spacing: 0.16em; color: var(--blue); line-height: 0.9; }
+  .bp-head .no { text-align: right; }
+  .bp-head .no b { display: block; font-size: 22pt; font-weight: 500; color: var(--blue); line-height: 1; margin-top: 4px; }
+  .bp-dim { position: relative; margin: 0.26in 0 0.24in; height: 14px; display: flex; align-items: center; justify-content: center; }
+  .bp-dim::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--blue); }
+  .bp-dim::after { content: ""; position: absolute; left: 0; right: 0; top: 2px; bottom: 2px; border-left: 1px solid var(--blue); border-right: 1px solid var(--blue); }
+  .bp-dim span { position: relative; background: #fff; padding: 0 10px; font-size: 8.5pt; letter-spacing: 0.08em; color: var(--blue); text-transform: uppercase; z-index: 1; }
+  .bp-arrow { position: absolute; top: 50%; width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; transform: translateY(-50%); }
+  .bp-arrow.l { left: 1px; border-right: 9px solid var(--blue); }
+  .bp-arrow.r { right: 1px; border-left: 9px solid var(--blue); }
+  .bp-info { display: grid; grid-template-columns: 1.3fr 1fr; border: 1px solid var(--blue); }
+  .bp-info > div { padding: 7px 10px 10px; }
+  .bp-info > div + div { border-left: 1px solid var(--blue); }
+  .bp-info .v { margin-top: 4px; line-height: 1.5; }
+  .bp-info .v b { font-weight: 600; }
+  table.bp-items { width: 100%; border-collapse: collapse; margin-top: 0.24in; background: #fff; }
+  .bp-items th { text-align: left; padding: 6px 8px; border: 1px solid var(--blue); }
+  .bp-items td { padding: 0 8px; height: 0.27in; border-left: 1px solid var(--blue); border-right: 1px solid var(--blue); border-bottom: 0.5px solid var(--blue-soft); white-space: nowrap; }
+  .bp-items tr:last-child td { border-bottom: 1px solid var(--blue); }
+  .bp-items .n { text-align: right; width: 1.0in; }
+  .bp-items th.n { text-align: right; }
+  .bp-low { margin-top: auto; display: grid; grid-template-columns: 1fr 3.35in; gap: 0.25in; align-items: end; }
+  .bp-notes { padding-bottom: 0.3in; }
+  .bp-notes ol { margin: 6px 0 0; padding-left: 1.6em; line-height: 1.6; }
+  .bp-tb { display: grid; grid-template-columns: 1.15in 1fr; border: 1.5px solid var(--blue); border-bottom: 0; border-right: 0; margin-right: -0.34in; background: #fff; position: relative; z-index: 1; }
+  .bp-tb > div { padding: 4px 8px; border-right: 1.5px solid var(--blue); border-bottom: 1px solid var(--blue); display: flex; align-items: center; min-height: 0.25in; }
+  .bp-tb > .k { border-right-width: 1px; }
+  .bp-tb > div:not(.k) { border-right: 0; }
+  .bp-tb .big { grid-column: span 2; flex-direction: column; align-items: flex-start; padding: 7px 10px 9px; border-bottom: 0; }
+  .bp-tb .big b { font-size: 21pt; font-weight: 500; color: var(--blue); letter-spacing: -0.02em; margin-top: 3px; line-height: 1; }
+
+  /* ---------- Editorial (magazine) ---------- */
+  .t-editorial { --ink: #1a1a17; --mute: #78756d; --rule: #1a1a17; --hair: #dddad3; --accent: #24473a;
+    font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 9.5pt;
+    padding: 0.55in 0.7in 0.5in; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+  .t-editorial .serif { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; }
+  .ed-mast { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 7px; border-bottom: 1px solid var(--rule); font-size: 8pt; text-transform: uppercase; letter-spacing: 0.14em; }
+  .ed-mast b { font-weight: 600; }
+  .ed-head { margin: 0.42in 0 0; font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 76pt; line-height: 0.88; letter-spacing: -0.025em; }
+  .ed-head em { font-style: italic; }
+  .ed-head span { color: var(--accent); margin-left: 0.12em; }
+  .ed-deck { margin-top: 0.16in; font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-size: 16pt; line-height: 1.25; color: var(--mute); max-width: 6.2in; }
+  .ed-deck b { font-weight: 400; color: var(--ink); }
+  .ed-cols { display: grid; grid-template-columns: 1fr 1fr 1.1fr; margin-top: 0.4in; border-top: 3px solid var(--rule); }
+  .ed-cols > div { padding: 10px 14px 14px; }
+  .ed-cols > div:first-child { padding-left: 0; }
+  .ed-cols > div + div { border-left: 1px solid var(--hair); }
+  .ed-k { font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--mute); margin-bottom: 6px; }
+  .ed-cols .v { line-height: 1.5; }
+  .ed-cols .v b { font-weight: 600; }
+  .ed-cols .amt { font-family: "Instrument Serif", Georgia, serif; font-size: 30pt; line-height: 1; color: var(--accent); letter-spacing: -0.01em; }
+  table.ed-items { width: 100%; border-collapse: collapse; margin-top: 0.22in; }
+  .ed-items th { font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--mute); text-align: left; padding: 0 0 7px; border-bottom: 1px solid var(--rule); }
+  .ed-items td { padding: 7px 0; border-bottom: 1px solid var(--hair); }
+  .ed-items .n { text-align: right; width: 0.95in; }
+  .ed-items td.amt { font-family: "Instrument Serif", Georgia, serif; font-size: 12.5pt; }
+  .ed-sum { margin: 0.16in 0 0 auto; width: 3in; }
+  .ed-sum div { display: flex; justify-content: space-between; align-items: baseline; padding: 3px 0; }
+  .ed-sum div span:first-child { color: var(--mute); }
+  .ed-sum .bal { margin-top: 8px; padding-top: 8px; border-top: 3px solid var(--rule); }
+  .ed-sum .bal span:first-child { color: var(--ink); font-weight: 600; }
+  .ed-sum .bal span:last-child { font-family: "Instrument Serif", Georgia, serif; font-size: 26pt; line-height: 1; }
+  .ed-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; padding-top: 10px; border-top: 1px solid var(--rule); }
+  .ed-foot .thx { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-size: 15pt; }
+  .ed-foot .pg { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.14em; color: var(--mute); }
+
+  /* ---------- Bauhaus (colour blocks) ---------- */
+  .t-bauhaus { --red: #d43f2a; --yellow: #f3b52f; --blue: #1f4fa0; --ink: #151515; --mute: #5c5c5c;
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-stretch: 100%; color: var(--ink); font-size: 9.5pt;
+    padding: 0.55in 0.6in 0.5in; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+  .bh-top { display: grid; grid-template-columns: 1fr 2.1in; gap: 0.3in; align-items: start; }
+  .bh-title h1 { margin: 0; font-size: 50pt; font-weight: 900; font-stretch: 125%; letter-spacing: -0.02em; line-height: 0.9; }
+  .bh-title .nm { margin-top: 12px; font-size: 13pt; font-weight: 600; font-stretch: 100%; }
+  .bh-art { position: relative; height: 1.75in; }
+  .bh-art .sq { position: absolute; right: 0; top: 0; width: 1.15in; height: 1.15in; background: var(--blue); }
+  .bh-art .ci { position: absolute; left: 0.05in; top: 0.42in; width: 1.3in; height: 1.3in; border-radius: 50%; background: var(--red); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; mix-blend-mode: multiply; }
+  .bh-art .ci span { font-size: 7pt; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+  .bh-art .ci b { font-size: 30pt; font-weight: 900; font-stretch: 112%; line-height: 1; }
+  .bh-art .tri { position: absolute; right: 0.05in; bottom: 0; width: 0; height: 0; border-left: 0.55in solid transparent; border-right: 0.55in solid transparent; border-bottom: 0.6in solid var(--yellow); }
+  .bh-info { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 0.22in; margin-top: 0.3in; }
+  .bh-info > div { border-top: 5px solid var(--ink); padding-top: 8px; }
+  .bh-info > div:nth-child(2) { border-top-color: var(--blue); }
+  .bh-info > div:nth-child(3) { border-top-color: var(--red); }
+  .bh-k { font-size: 7.5pt; font-weight: 800; font-stretch: 112%; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+  .bh-info .v { line-height: 1.5; }
+  .bh-info .row { display: flex; justify-content: space-between; gap: 10px; }
+  .bh-info .row span:first-child { color: var(--mute); }
+  table.bh-items { width: 100%; border-collapse: collapse; margin-top: 0.32in; }
+  .bh-items th { background: var(--ink); color: #fff; font-size: 7.5pt; font-weight: 800; font-stretch: 112%; letter-spacing: 0.1em; text-transform: uppercase; text-align: left; padding: 6px 8px; }
+  .bh-items td { padding: 7px 8px; border-bottom: 1.5px solid var(--ink); }
+  .bh-items .n { text-align: right; width: 0.95in; }
+  .bh-items td.amt { font-weight: 700; }
+  .bh-low { margin-top: auto; display: grid; grid-template-columns: 1fr 3.4in; align-items: stretch; }
+  .bh-left { padding: 12px 16px 12px 0; display: flex; flex-direction: column; justify-content: space-between; }
+  .bh-left .row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #d9d9d9; }
+  .bh-left .thx { margin-top: 12px; font-weight: 700; color: var(--blue); font-size: 11pt; }
+  .bh-bal { background: var(--yellow); padding: 14px 18px 16px; display: flex; flex-direction: column; justify-content: space-between; }
+  .bh-bal b { font-size: 36pt; font-weight: 900; font-stretch: 112%; letter-spacing: -0.02em; line-height: 1; margin-top: 10px; }
+  .bh-bal .by { margin-top: 6px; font-weight: 600; }
+
   @page { size: letter; margin: 0; }
   @media print {
-    body { background: #fff; }
-    .editor, .toast { display: none !important; }
-    .app { display: block; padding: 0; }
-    .paper { box-shadow: none; margin: 0; }
+    html, body { height: auto; background: #fff; }
+    .bar, .editor, .strip, .toast { display: none !important; }
+    .app, .stage, .sheet-area { display: block; height: auto; padding: 0; overflow: visible; }
+    .sheet { width: auto !important; height: auto !important; }
+    .sheet > .paper { position: relative; transform: none !important; box-shadow: none; margin: 0; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
 </head>
 <body>
+<header class="bar">
+  <div class="brand"><i aria-hidden="true"></i><span>Invoice Generator</span></div>
+  <div class="status" id="status" aria-live="polite"></div>
+  <div class="actions">
+    <button class="btn" id="newBtn" title="Next invoice number, today's date, clears the line items">New invoice</button>
+    <button class="btn primary" id="printBtn" title="In the print dialog choose Save as PDF">Print / Save PDF</button>
+  </div>
+</header>
+
 <div class="app">
-
-  <!-- ===================== EDITOR ===================== -->
+  <!-- ===================== FORM ===================== -->
   <aside class="editor">
-    <div class="btns" style="margin-top:0">
-      <button class="b primary" id="printBtn" title="Choose 'Save as PDF' as the printer">Print / Save as PDF</button>
-      <button class="b" id="newBtn" title="Next invoice number, today's date, clears the line items">New invoice</button>
-    </div>
-    <p class="hint">In the print dialog choose <b>Save as PDF</b>, paper size <b>Letter</b>, and turn <b>Headers and footers</b> off. Everything you type is saved automatically in this browser.</p>
+    <section class="sec">
+      <h2>Invoice</h2>
+      <div class="grid">
+        <div><label class="lbl-ui" for="f_name">Your name</label><input class="field" id="f_name" placeholder="Your full name"></div>
+        <div class="grid g2">
+          <div><label class="lbl-ui" for="f_number">Invoice #</label><input class="field" id="f_number"></div>
+          <div><label class="lbl-ui" for="f_date">Date</label><input class="field" type="date" id="f_date"></div>
+          <div><label class="lbl-ui" for="f_terms">Payment terms</label><input class="field" id="f_terms" list="termsList"></div>
+          <div><label class="lbl-ui" for="f_due">Due date</label><input class="field" type="date" id="f_due"></div>
+        </div>
+        <datalist id="termsList"><option>Net 15</option><option>Net 30</option><option>Net 45</option><option>Net 60</option><option>Due on receipt</option></datalist>
+        <div><label class="lbl-ui" for="f_job">Job</label><input class="field" id="f_job" placeholder="e.g. Software Development"></div>
+      </div>
+      <p class="hint">The due date follows the terms: Net 30 is 30 days after the invoice date. You can still change it.</p>
+    </section>
 
-    <h2>Template</h2>
-    <div class="tpls" id="tpls" role="radiogroup" aria-label="Invoice template"></div>
+    <section class="sec">
+      <h2>Bill to</h2>
+      <div class="grid">
+        <div><label class="lbl-ui" for="f_client">Client name</label><input class="field" id="f_client" placeholder="Client or company name"></div>
+        <div><label class="lbl-ui" for="f_addr">Address</label><textarea class="field" id="f_addr" placeholder="Street / P.O. Box&#10;City, State ZIP"></textarea></div>
+      </div>
+    </section>
 
-    <h2>You</h2>
-    <label>Your name (header)</label>
-    <input id="f_name" placeholder="Your full name">
+    <section class="sec">
+      <h2>Line items <small id="itemCount"></small></h2>
+      <div class="items" id="itemsBody"></div>
+      <div class="row-btns">
+        <button class="btn small" id="addRowBtn">+ Add row</button>
+        <button class="btn small" id="clearRowsBtn">Clear all</button>
+      </div>
+      <div class="quick">
+        <div class="grid qgrid">
+          <div><label class="lbl-ui" for="g_month">Fill a month by week</label><input class="field" type="month" id="g_month"></div>
+          <div><label class="lbl-ui" for="g_hours">Hrs/day</label><input class="field num" type="number" id="g_hours" step="0.25"></div>
+          <button class="btn" id="genBtn">Fill weeks</button>
+        </div>
+        <div class="grid g2" style="margin-top:10px">
+          <div><label class="lbl-ui" for="g_prefix">Row description</label><input class="field" id="g_prefix"></div>
+          <div><label class="lbl-ui" for="g_rate">Default rate ($/h)</label><input class="field num" type="number" id="g_rate" step="0.01" placeholder="50.00"></div>
+        </div>
+        <p class="hint">Adds one row per Monday–Friday week, like "Development work 09/21-09/25" at 40 hours. Edit the hours for weeks with days off.</p>
+      </div>
+      <div class="totals" id="totals"></div>
+    </section>
 
-    <h2>Invoice</h2>
-    <div class="row2">
-      <div><label>Date</label><input type="date" id="f_date"></div>
-      <div><label>Invoice #</label><input id="f_number"></div>
-    </div>
-    <div class="row2">
-      <div><label>Payment terms</label><input id="f_terms" list="termsList"></div>
-      <div><label>Due date</label><input type="date" id="f_due"></div>
-    </div>
-    <datalist id="termsList"><option>Net 15</option><option>Net 30</option><option>Net 45</option><option>Net 60</option><option>Due on receipt</option></datalist>
-    <p class="hint">The due date is filled in from the terms ("Net 30" = date + 30 days). You can still change it by hand.</p>
-    <label>Job</label>
-    <input id="f_job" placeholder="e.g. Software Development">
+    <section class="sec">
+      <h2>Totals &amp; footer</h2>
+      <div class="grid g2">
+        <div><label class="lbl-ui" for="f_tax">Sales tax (%)</label><input class="field num" type="number" id="f_tax" step="0.01"></div>
+        <div><label class="lbl-ui" for="f_minRows">Table rows</label><input class="field num" type="number" id="f_minRows" min="0" max="11"></div>
+      </div>
+      <p class="hint">Table rows pads the table with empty lines in Original, Carbon Copy and Blueprint. Up to 11 line items fit on the page.</p>
+      <div style="margin-top:12px"><label class="lbl-ui" for="f_thanks">Footer message</label><input class="field" id="f_thanks"></div>
+    </section>
 
-    <h2>Bill to</h2>
-    <label>Client name</label>
-    <input id="f_client" placeholder="Client or company name">
-    <label>Client address</label>
-    <textarea id="f_addr" placeholder="Street / P.O. Box&#10;City, State ZIP"></textarea>
-
-    <h2>Line items</h2>
-    <table class="items">
-      <thead><tr><th style="width:52%">Description</th><th>Hours</th><th>Rate</th><th></th></tr></thead>
-      <tbody id="itemsBody"></tbody>
-    </table>
-    <div class="btns">
-      <button class="b" id="addRowBtn">+ Add row</button>
-      <button class="b" id="clearRowsBtn">Clear rows</button>
-    </div>
-
-    <label style="margin-top:14px">Auto-fill weekly rows for a month</label>
-    <div class="row3">
-      <div><input type="month" id="g_month"></div>
-      <div><input type="number" id="g_hours" step="0.25" title="Hours per weekday"></div>
-      <div><button class="b" id="genBtn" style="width:100%">Fill weeks</button></div>
-    </div>
-    <p class="hint">Creates one row per Mon–Fri week in that month ("Development work 08/03-08/07", 40 h), using the hours per day and the default rate below.</p>
-    <div class="row2">
-      <div><label>Row description prefix</label><input id="g_prefix"></div>
-      <div><label>Default rate ($/h)</label><input type="number" id="g_rate" step="0.01" placeholder="e.g. 50.00"></div>
-    </div>
-
-    <h2>Totals</h2>
-    <div class="row2">
-      <div><label>Sales tax (%)</label><input type="number" id="f_tax" step="0.01"></div>
-      <div><label>Minimum table rows</label><input type="number" id="f_minRows" min="0" max="11"></div>
-    </div>
-    <p class="hint">Empty rows pad the table in the Original and Carbon Copy templates. 11 matches your invoice (12 rows including the hours total). Up to 11 line items fit on the page.</p>
-    <label>Footer message</label>
-    <input id="f_thanks">
-
-    <h2>Backup</h2>
-    <div class="btns" style="margin-top:0">
-      <button class="b" id="exportBtn">Export data (.json)</button>
-      <button class="b" id="importBtn">Import data</button>
-      <input type="file" id="importFile" accept="application/json" hidden>
-    </div>
+    <section class="sec">
+      <h2>Backup</h2>
+      <div class="row-btns" style="margin-top:0">
+        <button class="btn small" id="exportBtn">Export data (.json)</button>
+        <button class="btn small" id="importBtn">Import data</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+      <p class="hint">Everything is saved in this browser automatically. Export to move it to another device. When printing, pick Save as PDF, Letter size, and turn headers and footers off.</p>
+    </section>
   </aside>
 
-  <!-- ===================== INVOICE ===================== -->
-  <main>
-    <div class="paper t-classic" id="paper"></div>
-    <template id="tplClassic">
-      <div class="inv-name" id="p_name"></div>
+  <!-- ===================== PREVIEW ===================== -->
+  <main class="stage" id="stage">
+    <div class="strip">
+      <div class="strip-h"><b>Template</b><span id="tplName"></span></div>
+      <div class="tpls" id="tpls" role="radiogroup" aria-label="Invoice template"></div>
+    </div>
+    <div class="sheet-area" id="sheetArea">
+      <div class="sheet" id="sheet"><div class="paper t-classic" id="paper"></div></div>
+    </div>
+  </main>
+</div>
+<template id="tplClassic">
+      <div class="inv-name" data-f="name"></div>
       <div class="inv-title">Invoice</div>
       <div class="inv-hr"></div>
 
       <div class="meta">
         <div class="meta-left">
           <div class="lbl">Date:</div>
-          <div class="val" id="p_date"></div>
+          <div class="val" data-f="date"></div>
           <div class="lbl">Invoice #</div>
-          <div class="val" id="p_number"></div>
+          <div class="val" data-f="number"></div>
           <div class="lbl">Due Date:</div>
-          <div class="val" id="p_due"></div>
+          <div class="val" data-f="due"></div>
         </div>
         <div class="meta-right">
           <div class="lbl">To:</div>
           <div>
-            <div class="client-name" id="p_client"></div>
-            <div class="client-addr" id="p_addr"></div>
+            <div class="client-name" data-f="client"></div>
+            <div class="client-addr" data-f="addr"></div>
           </div>
         </div>
       </div>
@@ -367,26 +556,24 @@
       <div class="hdr job-hdr"><div class="lbl">Job</div><div class="lbl">Payment Terms</div><div class="lbl">Due Date</div></div>
       <table class="inv job">
         <colgroup><col><col><col></colgroup>
-        <tr><td id="p_job"></td><td id="p_terms"></td><td id="p_due2"></td></tr>
+        <tr><td data-f="job"></td><td data-f="terms"></td><td data-f="due2"></td></tr>
       </table>
 
       <div class="hdr lines-hdr"><div class="lbl">Description</div><div class="lbl"># Hours</div><div class="lbl">Rate</div><div class="lbl">Line Total</div></div>
       <table class="inv lines">
         <colgroup><col class="c1"><col><col><col></colgroup>
-        <tbody id="p_lines"></tbody>
+        <tbody data-f="lines"></tbody>
       </table>
 
       <table class="sum">
-        <tr><td class="k lbl">Total</td><td class="v" id="p_total"></td></tr>
-        <tr><td class="k lbl">Sales Tax</td><td class="v" id="p_tax"></td></tr>
-        <tr><td class="k lbl">Balance<br>Due:</td><td class="v" id="p_balance"></td></tr>
+        <tr><td class="k lbl">Total</td><td class="v" data-f="total"></td></tr>
+        <tr><td class="k lbl">Sales Tax</td><td class="v" data-f="tax"></td></tr>
+        <tr><td class="k lbl">Balance<br>Due:</td><td class="v" data-f="balance"></td></tr>
       </table>
 
-      <div class="thanks" id="p_thanks"></div>
-    </template>
-  </main>
-</div>
-<div class="toast" id="toast"></div>
+      <div class="thanks" data-f="thanks"></div>
+</template>
+<div class="toast" id="toast" role="status"></div>
 
 <script>
 (function () {
@@ -405,19 +592,21 @@
   const plain = n => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const hrs = n => (Math.round(n * 100) / 100).toString();
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-
   const money2 = n => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtLong = s => { const d = parseISO(s); return d ? d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : ""; };
   const padNo = n => /^\d+$/.test(String(n).trim()) ? String(n).trim().padStart(4, "0") : String(n);
   const lines = s => esc(s).replace(/\n/g, "<br>");
 
   const TEMPLATES = [
-    { id: "classic", name: "Original", desc: "Your template", sw: "background:#e6efea;color:#5e5b96;font-family:InvoiceGothic,'Century Gothic',sans-serif;font-weight:700;letter-spacing:.06em" },
-    { id: "swiss",   name: "Swiss",    desc: "Modern, bold", sw: "background:#fff;color:#111214;font-family:'Schibsted Grotesk',sans-serif;font-weight:800;letter-spacing:-.04em;border-bottom:3px solid #111214;box-shadow:inset -10px 0 0 #e4412b" },
-    { id: "ledger",  name: "Ledger",   desc: "Modern, sidebar", sw: "background:linear-gradient(90deg,#1c2a2f 0 38%,#fff 38%);color:#f1b25b;font-family:'Geist Mono',monospace" },
-    { id: "minimal", name: "Minimal",  desc: "Quiet, airy", sw: "background:#fff;color:#1b1b1b;font-family:'Work Sans',sans-serif;font-weight:300;border-bottom:1px solid #e8e8e8" },
-    { id: "carbon",  name: "Carbon Copy", desc: "Retro form", sw: "background:#fffdf7;color:#a3302a;font-family:'Courier Prime',monospace;font-weight:700;border-bottom:2px dashed #a3302a" },
-    { id: "formal",  name: "Letterhead", desc: "Formal, serif", sw: "background:#fff;color:#1e2945;font-family:'EB Garamond',serif;font-style:italic;font-size:19px;border-bottom:4px double #1e2945" },
+    { id: "classic",   name: "Original",    desc: "Your template" },
+    { id: "swiss",     name: "Swiss",       desc: "Modern, bold" },
+    { id: "ledger",    name: "Ledger",      desc: "Modern, sidebar" },
+    { id: "editorial", name: "Editorial",   desc: "Magazine serif" },
+    { id: "minimal",   name: "Minimal",     desc: "Quiet, airy" },
+    { id: "blueprint", name: "Blueprint",   desc: "Technical drawing" },
+    { id: "bauhaus",   name: "Bauhaus",     desc: "Colour blocks" },
+    { id: "carbon",    name: "Carbon Copy", desc: "Retro form" },
+    { id: "formal",    name: "Letterhead",  desc: "Formal, serif" },
   ];
 
   const defaults = {
@@ -445,7 +634,7 @@
   if (!state.due) state.due = dueFromTerms(state.date, state.terms) || state.date;
 
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
-  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("show"), 1800); }
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("show"), 2200); }
 
   function dueFromTerms(dateISO, terms) {
     const d = parseISO(dateISO); if (!d) return null;
@@ -478,19 +667,30 @@
   function renderItemsEditor() {
     const body = $("itemsBody");
     body.innerHTML = "";
+    if (!state.items.length) {
+      body.innerHTML = `<div class="items-empty">No line items yet. Add a row, or fill a whole month below.</div>`;
+      return;
+    }
     state.items.forEach((it, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML =
-        `<td><input data-k="desc" value="${esc(it.desc)}"></td>` +
-        `<td class="num"><input data-k="hours" type="number" step="0.25" value="${esc(it.hours)}"></td>` +
-        `<td class="num"><input data-k="rate" type="number" step="0.01" value="${esc(it.rate)}"></td>` +
-        `<td><button class="del" title="Remove row">&times;</button></td>`;
-      tr.querySelectorAll("input").forEach(inp => inp.addEventListener("input", () => { it[inp.dataset.k] = inp.value; update(); }));
-      tr.querySelector(".del").addEventListener("click", () => { state.items.splice(i, 1); renderItemsEditor(); update(); });
-      body.appendChild(tr);
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML =
+        `<input class="field desc" id="it_desc_${i}" data-k="desc" aria-label="Description, row ${i + 1}" value="${esc(it.desc)}">` +
+        `<input class="field num" id="it_hours_${i}" data-k="hours" type="number" step="0.25" aria-label="Hours, row ${i + 1}" placeholder="hrs" value="${esc(it.hours)}">` +
+        `<input class="field num" id="it_rate_${i}" data-k="rate" type="number" step="0.01" aria-label="Rate, row ${i + 1}" placeholder="rate" value="${esc(it.rate)}">` +
+        `<div class="amt" data-amt="${i}"></div>` +
+        `<button class="x" title="Remove row" aria-label="Remove row ${i + 1}">&times;</button>`;
+      // amount sits under the inputs on the right; order: desc / hours rate amt x
+      row.querySelectorAll("input").forEach(inp => inp.addEventListener("input", () => { it[inp.dataset.k] = inp.value; update(); }));
+      row.querySelector(".x").addEventListener("click", () => { state.items.splice(i, 1); renderItemsEditor(); update(); });
+      body.appendChild(row);
     });
   }
-  $("addRowBtn").onclick = () => { state.items.push({ desc: state.prefix + " ", hours: "", rate: state.rate }); renderItemsEditor(); update(); };
+  $("addRowBtn").onclick = () => {
+    state.items.push({ desc: state.prefix + " ", hours: "", rate: state.rate });
+    renderItemsEditor(); update();
+    const el = $("it_desc_" + (state.items.length - 1)); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+  };
   $("clearRowsBtn").onclick = () => { if (state.items.length && !confirm("Remove all line items?")) return; state.items = []; renderItemsEditor(); update(); };
 
   // ---------- weekly generator ----------
@@ -499,15 +699,15 @@
     const mv = $("g_month").value; if (!mv) return toast("Pick a month first");
     const [y, m] = mv.split("-").map(Number);
     const perDay = num(state.hoursPerDay);
-    const rows = [];
+    const weeks = [];
     let week = null;
     for (let d = new Date(y, m - 1, 1); d.getMonth() === m - 1; d.setDate(d.getDate() + 1)) {
       const wd = d.getDay();
       if (wd === 0 || wd === 6) { week = null; continue; }
-      if (!week) { week = { start: new Date(d), end: new Date(d), days: 0 }; rows.push(week); }
+      if (!week) { week = { start: new Date(d), end: new Date(d), days: 0 }; weeks.push(week); }
       week.end = new Date(d); week.days++;
     }
-    const items = rows.map(w => ({
+    const items = weeks.map(w => ({
       desc: state.prefix + " " + (w.days === 1 ? mmdd(w.start) : mmdd(w.start) + "-" + mmdd(w.end)),
       hours: hrs(w.days * perDay),
       rate: state.rate,
@@ -515,7 +715,7 @@
     if (state.items.length && !confirm("Replace the current line items?")) return;
     state.items = items;
     renderItemsEditor(); update();
-    toast(items.length + " rows added — adjust any days off by editing hours");
+    toast(items.length + " weeks added. Edit the hours for any days off.");
   };
 
   // ---------- new / print / backup ----------
@@ -546,19 +746,10 @@
   $("importBtn").onclick = () => $("importFile").click();
   $("importFile").onchange = async e => {
     const f = e.target.files[0]; if (!f) return;
-    try { state = Object.assign({}, defaults, JSON.parse(await f.text())); fillForm(); renderPicker(); update(); toast("Imported"); }
+    try { state = Object.assign({}, defaults, JSON.parse(await f.text())); fillForm(); renderPicker(); update(); toast("Data imported"); }
     catch (err) { alert("That file could not be read: " + err.message); }
     e.target.value = "";
   };
-
-  // ---------- template picker ----------
-  function renderPicker() {
-    const box = $("tpls");
-    box.innerHTML = TEMPLATES.map(t =>
-      `<button type="button" class="tpl" role="radio" id="tpl_${t.id}" data-id="${t.id}" aria-checked="${state.template === t.id}">` +
-      `<span class="sw" style="${t.sw}">Aa 96</span><span class="nm">${t.name}</span><span class="ds">${t.desc}</span></button>`).join("");
-    box.querySelectorAll(".tpl").forEach(b => b.onclick = () => { state.template = b.dataset.id; renderPicker(); update(); });
-  }
 
   // ---------- data shared by every template ----------
   function invoiceData() {
@@ -574,7 +765,36 @@
     return { items, totalHours, total, tax, balance: total + tax, pad: Math.max(0, num(state.minRows) - items.length) };
   }
 
+  // ---------- templates ----------
   const R = {};
+
+  R.classic = d => {
+    const root = document.createElement("div");
+    root.innerHTML = $("tplClassic").innerHTML;
+    const f = (k, v) => { root.querySelector(`[data-f="${k}"]`).textContent = v; };
+    f("name", state.name);
+    f("date", fmtDate(state.date));
+    f("number", state.number);
+    f("due", fmtShort(state.due));
+    f("due2", fmtShort(state.due));
+    f("job", state.job);
+    f("terms", state.terms);
+    f("client", state.client);
+    f("addr", state.addr);
+    f("thanks", state.thanks);
+    let html = "";
+    for (const i of d.items) {
+      html += `<tr><td>${esc(i.desc)}</td><td class="c">${i.hasH ? esc(hrs(i.h)) : ""}</td>` +
+              `<td class="c">${i.hasR ? rateFmt(i.r) : ""}</td><td class="c">${i.hasNums ? money(i.line) : ""}</td></tr>`;
+    }
+    for (let k = 0; k < d.pad; k++) html += `<tr><td></td><td></td><td></td><td></td></tr>`;
+    html += `<tr><td></td><td class="c">${d.totalHours ? esc(hrs(d.totalHours)) : ""}</td><td></td><td></td></tr>`;
+    root.querySelector('[data-f="lines"]').innerHTML = html;
+    f("total", money(d.total));
+    f("tax", plain(d.tax));
+    f("balance", money(d.balance));
+    return root.innerHTML;
+  };
 
   R.swiss = d => `
     <div class="sw-top"><span class="who">${esc(state.name)}</span><span class="tag">Invoice ${esc(padNo(state.number))}</span></div>
@@ -706,50 +926,151 @@
     <div class="fm-remit">Kindly remit payment by ${fmtLong(state.due)}.</div>
     <div class="fm-foot"><div class="fm-rule"></div><div class="thanks2">${esc(state.thanks)}</div></div>`;
 
+  const rows = (d, amtClass) => d.items.map(i =>
+    `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n ${amtClass || ""}">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("");
+
+  R.blueprint = d => `
+    <div class="bp-frame">
+      <div class="bp-head">
+        <div><div class="bp-l">From</div><div style="margin:3px 0 10px;font-size:11pt;font-weight:500">${esc(state.name)}</div><h1>INVOICE</h1></div>
+        <div class="no"><span class="bp-l">Invoice no.</span><b>${esc(padNo(state.number))}</b></div>
+      </div>
+      <div class="bp-dim"><i class="bp-arrow l"></i><span>${fmtDate(state.date)} · ${esc(state.client)}</span><i class="bp-arrow r"></i></div>
+      <div class="bp-info">
+        <div><div class="bp-l">Client</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+        <div><div class="bp-l">Payment terms</div><div class="v">${esc(state.terms)}</div><div class="bp-l" style="margin-top:8px">Scope</div><div class="v">${esc(state.job)}</div></div>
+      </div>
+      <table class="bp-items"><thead><tr><th class="bp-l">Description</th><th class="bp-l n">Hours</th><th class="bp-l n">Rate</th><th class="bp-l n">Amount</th></tr></thead><tbody>
+        ${rows(d)}
+        ${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(d.pad)}
+      </tbody></table>
+      <div class="bp-low">
+        <div class="bp-notes">
+          <div class="bp-l">Notes</div>
+          <ol><li>Total ${money2(d.total)} · sales tax ${plain(d.tax)}.</li><li>Payment due ${fmtDate(state.due)} (${esc(state.terms)}).</li><li>${esc(state.thanks)}</li></ol>
+        </div>
+        <div class="bp-tb">
+          <div class="k bp-l">Prepared by</div><div>${esc(state.name)}</div>
+          <div class="k bp-l">Date issued</div><div>${fmtDate(state.date)}</div>
+          <div class="k bp-l">Due date</div><div>${fmtDate(state.due)}</div>
+          <div class="k bp-l">Total hours</div><div>${hrs(d.totalHours)}</div>
+          <div class="big"><span class="bp-l">Balance due</span><b>${money2(d.balance)}</b></div>
+        </div>
+      </div>
+    </div>`;
+
+  R.editorial = d => `
+    <div class="ed-mast"><b>${esc(state.name)}</b><span>${fmtLong(state.date)}</span></div>
+    <h1 class="ed-head"><em>Invoice</em> <span>no.&nbsp;${esc(state.number)}</span></h1>
+    <p class="ed-deck">${esc(state.job)} for <b>${esc(state.client)}</b>, ${hrs(d.totalHours)} hours billed on ${esc(state.terms)} terms.</p>
+    <div class="ed-cols">
+      <div><div class="ed-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+      <div><div class="ed-k">Details</div><div class="v">Issued ${fmtDate(state.date)}<br>Due ${fmtDate(state.due)}<br>${esc(state.terms)} · ${esc(state.job)}</div></div>
+      <div><div class="ed-k">Amount due</div><div class="amt">${money2(d.balance)}</div></div>
+    </div>
+    <table class="ed-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d, "amt")}</tbody></table>
+    <div class="ed-sum">
+      <div><span>Total hours</span><span>${hrs(d.totalHours)}</span></div>
+      <div><span>Total</span><span>${money2(d.total)}</span></div>
+      <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+      <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
+    </div>
+    <div class="ed-foot"><span class="thx">${esc(state.thanks)}</span><span class="pg">Invoice ${esc(state.number)} · Due ${fmtDate(state.due)}</span></div>`;
+
+  R.bauhaus = d => `
+    <div class="bh-top">
+      <div class="bh-title"><h1>INVOICE</h1><div class="nm">${esc(state.name)}</div></div>
+      <div class="bh-art"><div class="sq"></div><div class="tri"></div><div class="ci"><span>No.</span><b>${esc(String(state.number).padStart(2, "0"))}</b></div></div>
+    </div>
+    <div class="bh-info">
+      <div><div class="bh-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+      <div><div class="bh-k">Dates</div><div class="v"><div class="row"><span>Issued</span><span>${fmtDate(state.date)}</span></div><div class="row"><span>Due</span><span>${fmtDate(state.due)}</span></div></div></div>
+      <div><div class="bh-k">Job</div><div class="v">${esc(state.job)}<div class="row" style="margin-top:4px"><span>Terms</span><span>${esc(state.terms)}</span></div></div></div>
+    </div>
+    <table class="bh-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d, "amt")}</tbody></table>
+    <div class="bh-low">
+      <div class="bh-left">
+        <div>
+          <div class="row"><span>Total hours</span><span>${hrs(d.totalHours)}</span></div>
+          <div class="row"><span>Total</span><span>${money2(d.total)}</span></div>
+          <div class="row"><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+        </div>
+        <div class="thx">${esc(state.thanks)}</div>
+      </div>
+      <div class="bh-bal"><span class="bh-k">Balance due</span><b>${money2(d.balance)}</b><span class="by">by ${fmtDate(state.due)}</span></div>
+    </div>`;
+
+  function renderPaper(el, tpl, d) {
+    el.className = "paper t-" + tpl;
+    el.innerHTML = R[tpl](d);
+  }
+
+  // ---------- template picker (live thumbnails) ----------
+  function renderPicker() {
+    const box = $("tpls");
+    box.innerHTML = TEMPLATES.map(t =>
+      `<button type="button" class="tpl" role="radio" id="tpl_${t.id}" data-id="${t.id}" aria-checked="${state.template === t.id}">` +
+      `<span class="thumb"><div class="paper" data-thumb="${t.id}"></div></span><span class="nm">${t.name}</span><span class="ds">${t.desc}</span></button>`).join("");
+    box.querySelectorAll(".tpl").forEach(b => b.onclick = () => {
+      state.template = b.dataset.id;
+      box.querySelectorAll(".tpl").forEach(x => x.setAttribute("aria-checked", String(x === b)));
+      update();
+    });
+    const cur = TEMPLATES.find(t => t.id === state.template);
+    $("tplName").textContent = cur ? cur.name + " · " + cur.desc : "";
+    thumbs();
+  }
+  function thumbs() {
+    const d = invoiceData();
+    document.querySelectorAll("[data-thumb]").forEach(el => renderPaper(el, el.dataset.thumb, d));
+  }
+  let thumbTimer;
+
+  // ---------- fit the sheet to the preview width ----------
+  function fit() {
+    const area = $("sheetArea");
+    const avail = area.clientWidth - 40;
+    const s = Math.min(1, Math.max(0.3, avail / 816));
+    $("sheet").style.width = 816 * s + "px";
+    $("sheet").style.height = 1056 * s + "px";
+    $("paper").style.transform = s === 1 ? "none" : `scale(${s})`;
+  }
+  new ResizeObserver(fit).observe($("sheetArea"));
+
   // ---------- preview ----------
   function update() {
-    const paper = $("paper");
     const tpl = R[state.template] ? state.template : "classic";
-    paper.className = "paper t-" + tpl;
-    if (tpl !== "classic") { paper.innerHTML = R[tpl](invoiceData()); save(); return; }
-    paper.innerHTML = $("tplClassic").innerHTML;
+    const d = invoiceData();
+    renderPaper($("paper"), tpl, d);
 
-    $("p_name").textContent = state.name;
-    $("p_date").textContent = fmtDate(state.date);
-    $("p_number").textContent = state.number;
-    $("p_due").textContent = fmtShort(state.due);
-    $("p_due2").textContent = fmtShort(state.due);
-    $("p_job").textContent = state.job;
-    $("p_terms").textContent = state.terms;
-    $("p_client").textContent = state.client;
-    $("p_addr").textContent = state.addr;
-    $("p_thanks").textContent = state.thanks;
+    // header status
+    const cur = TEMPLATES.find(t => t.id === tpl);
+    $("tplName").textContent = cur.name + " · " + cur.desc;
+    $("status").innerHTML =
+      `<b>Invoice ${esc(state.number)}</b>` +
+      (state.client ? `<span class="opt">${esc(state.client)}</span>` : "") +
+      `<span class="sep"></span><span class="amt">${money2(d.balance)}</span>` +
+      (state.due ? `<span class="opt">due ${fmtDate(state.due)}</span>` : "");
 
-    let totalHours = 0, total = 0, html = "";
-    for (const it of state.items) {
-      const h = num(it.hours), r = num(it.rate);
-      const hasNums = String(it.hours).trim() !== "" || String(it.rate).trim() !== "";
-      const line = Math.round(h * r * 100) / 100;
-      totalHours += h; total += line;
-      html += `<tr><td>${esc(it.desc)}</td><td class="c">${String(it.hours).trim() === "" ? "" : esc(hrs(h))}</td>` +
-              `<td class="c">${String(it.rate).trim() === "" ? "" : rateFmt(r)}</td><td class="c">${hasNums ? money(line) : ""}</td></tr>`;
-    }
-    const pad = Math.max(0, num(state.minRows) - state.items.length);
-    for (let i = 0; i < pad; i++) html += `<tr><td></td><td></td><td></td><td></td></tr>`;
-    html += `<tr><td></td><td class="c">${totalHours ? esc(hrs(totalHours)) : ""}</td><td></td><td></td></tr>`;
-    $("p_lines").innerHTML = html;
+    // per-row amounts + totals in the form
+    d.items.forEach((i, k) => { const el = document.querySelector(`[data-amt="${k}"]`); if (el) el.innerHTML = i.hasNums ? money2(i.line) : "—"; });
+    $("itemCount").textContent = d.items.length ? `${d.items.length} row${d.items.length === 1 ? "" : "s"} · ${hrs(d.totalHours)} h` : "";
+    $("totals").innerHTML = d.items.length ?
+      `<div><span>Total</span><span>${money2(d.total)}</span></div>` +
+      `<div><span>Sales tax</span><span>${plain(d.tax)}</span></div>` +
+      `<div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>` : "";
 
-    const tax = Math.round(total * num(state.tax)) / 100;
-    $("p_total").textContent = money(total);
-    $("p_tax").textContent = plain(tax);
-    $("p_balance").textContent = money(total + tax);
+    clearTimeout(thumbTimer);
+    thumbTimer = setTimeout(thumbs, 250);
     save();
   }
 
   fillForm();
-  renderPicker();
   $("g_month").value = defaultMonth();
+  renderPicker();
   update();
+  fit();
+  document.fonts.ready.then(thumbs);
 })();
 </script>
 </body>
