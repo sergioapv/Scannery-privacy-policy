@@ -4,15 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Invoice Generator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Questrial&family=Didact+Gothic&display=swap" rel="stylesheet">
 <style>
+  /* Century Gothic when installed, otherwise TeX Gyre Adventor (free look-alike with a real bold) */
+  @font-face { font-family: "InvoiceGothic"; font-weight: 400; src: local("Century Gothic"), local("CenturyGothic"), url("fonts/texgyreadventor-regular.otf") format("opentype"); }
+  @font-face { font-family: "InvoiceGothic"; font-weight: 700; src: local("Century Gothic Bold"), local("CenturyGothic-Bold"), url("fonts/texgyreadventor-bold.otf") format("opentype"); }
   :root {
     --purple: #5e5b96;
     --navy: #1d3451;
     --green: #83b29b;
     --fill: #e6efea;
-    --font: "Century Gothic", CenturyGothic, "Questrial", "Didact Gothic", AppleGothic, sans-serif;
+    --font: "InvoiceGothic", "Century Gothic", sans-serif;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: #eef0f3; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #222; }
