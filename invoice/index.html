@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Invoice Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Work+Sans:wght@300;400;500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Archivo+Narrow:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   /* Century Gothic when installed, otherwise TeX Gyre Adventor (free look-alike with a real bold) */
   @font-face { font-family: "InvoiceGothic"; font-weight: 400; src: local("Century Gothic"), local("CenturyGothic"), url("fonts/texgyreadventor-regular.otf") format("opentype"); }
@@ -47,8 +50,9 @@
   .toast.show { opacity: .95; }
 
   /* ---------- Invoice (matches template) ---------- */
-  .paper { background: #fff; width: 8.5in; height: 11in; margin: 0 auto; padding: 0 0.75in; position: relative; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.12); font-family: var(--font); color: var(--navy); font-size: 9pt; letter-spacing: .06em; font-synthesis: weight style; }
-  .paper > * { position: absolute; left: 0.75in; right: 0.75in; }
+  .paper { background: #fff; width: 8.5in; height: 11in; margin: 0 auto; position: relative; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+  .paper.t-classic { padding: 0 0.75in; font-family: var(--font); color: var(--navy); font-size: 9pt; letter-spacing: .06em; font-synthesis: weight style; }
+  .t-classic > * { position: absolute; left: 0.75in; right: 0.75in; }
   .lbl { color: var(--purple); font-weight: 700; font-size: 8.5pt; text-transform: uppercase; letter-spacing: .08em; }
   .inv-name { top: 0.98in; text-align: center; color: var(--purple); font-size: 29pt; line-height: 1; text-transform: uppercase; font-weight: 400; letter-spacing: .02em; white-space: nowrap; }
   .inv-title { top: 1.62in; text-align: center; color: var(--purple); font-size: 22pt; line-height: 1; text-transform: uppercase; font-weight: 700; letter-spacing: .03em; }
@@ -83,6 +87,170 @@
   table.sum tr:first-child td.v { border-top-width: 1px; }
   .thanks { top: 10.06in; text-align: center; color: var(--purple); font-size: 9pt; }
 
+
+  /* ---------- Template picker ---------- */
+  .tpls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tpl { font: inherit; text-align: left; background: #fff; border: 1px solid #cfd3da; border-radius: 8px; padding: 0; cursor: pointer; overflow: hidden; }
+  .tpl:hover { border-color: #9aa0ab; }
+  .tpl:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+  .tpl[aria-checked="true"] { border-color: var(--purple); box-shadow: 0 0 0 1.5px var(--purple); }
+  .tpl .sw { height: 38px; display: flex; align-items: center; padding: 0 9px; font-size: 17px; line-height: 1; }
+  .tpl .nm { display: block; padding: 6px 9px 0; font-size: 12.5px; font-weight: 600; color: #222; }
+  .tpl .ds { display: block; padding: 1px 9px 7px; font-size: 11px; color: #777; }
+
+  /* ---------- Swiss (modern) ---------- */
+  .t-swiss { --ink: #111214; --mute: #6d7179; --hair: #e3e3e6; --accent: #e4412b;
+    font-family: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 9.5pt;
+    padding: 0.6in 0.7in 0.55in; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+  .sw-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .sw-top .who { font-size: 12pt; font-weight: 700; letter-spacing: -0.01em; }
+  .sw-top .tag { color: var(--mute); font-weight: 500; }
+  .sw-head { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.6in; padding-bottom: 0.14in; border-bottom: 3px solid var(--ink); }
+  .sw-head h1 { margin: 0; font-size: 68pt; font-weight: 800; letter-spacing: -0.05em; line-height: 0.78; }
+  .sw-head .num { font-size: 30pt; font-weight: 700; color: var(--accent); letter-spacing: -0.03em; line-height: 0.8; }
+  .sw-k { font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mute); margin-bottom: 5px; }
+  .sw-v { font-size: 10pt; line-height: 1.4; }
+  .sw-grid { display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr; gap: 0.2in 0.25in; padding: 0.24in 0 0.26in; border-bottom: 1px solid var(--ink); }
+  .sw-grid .to { grid-row: span 2; }
+  .sw-grid .job { grid-column: span 3; }
+  .sw-v .strong { font-weight: 700; }
+  table.sw-items { width: 100%; border-collapse: collapse; margin-top: 0.32in; }
+  .sw-items th { font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mute); text-align: left; padding: 0 0 8px; border-bottom: 1px solid var(--ink); }
+  .sw-items td { padding: 7px 0; border-bottom: 1px solid var(--hair); }
+  .sw-items .n { text-align: right; width: 1.05in; }
+  .sw-items .amt { font-weight: 600; }
+  .sw-foot { margin-top: auto; display: grid; grid-template-columns: 1fr 2.8in; gap: 0.4in; align-items: end; }
+  .sw-hours { font-size: 26pt; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .sw-hours small { font-size: 11pt; font-weight: 500; color: var(--mute); letter-spacing: 0; }
+  .sw-thanks { margin-top: 0.22in; color: var(--mute); }
+  .sw-sum div { display: flex; justify-content: space-between; padding: 5px 0; }
+  .sw-sum .bal { border-top: 3px solid var(--ink); margin-top: 6px; padding-top: 10px; align-items: baseline; }
+  .sw-sum .bal b { font-size: 26pt; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: proportional-nums; }
+  .sw-sum .due { color: var(--accent); font-weight: 600; justify-content: flex-end; padding-top: 2px; }
+
+  /* ---------- Ledger (modern, sidebar) ---------- */
+  .t-ledger { --side: #1c2a2f; --side-ink: #eef3f2; --side-mute: #8fa6a8; --amber: #f1b25b; --ink: #172024; --mute: #6c787d; --hair: #e5e9ea;
+    display: grid; grid-template-columns: 2.55in 1fr; font-family: "Geist", system-ui, sans-serif; color: var(--ink); font-size: 9.5pt; }
+  .t-ledger .mono { font-family: "Geist Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .lg-side { background: var(--side); color: var(--side-ink); padding: 0.62in 0.4in 0.55in; display: flex; flex-direction: column; gap: 0.26in; }
+  .lg-name { font-size: 15pt; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
+  .lg-k { font-family: "Geist Mono", ui-monospace, monospace; font-size: 6.8pt; text-transform: uppercase; letter-spacing: 0.12em; color: var(--side-mute); margin-bottom: 5px; }
+  .lg-v { line-height: 1.5; }
+  .lg-v .strong { font-weight: 600; }
+  .lg-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.22in 0.15in; }
+  .lg-due { margin-top: auto; padding-top: 0.22in; border-top: 1px solid rgba(255,255,255,.16); }
+  .lg-due .amt { font-family: "Geist Mono", ui-monospace, monospace; font-size: 22pt; color: var(--amber); letter-spacing: -0.04em; line-height: 1.1; }
+  .lg-due .by { color: var(--side-mute); margin-top: 4px; }
+  .lg-main { padding: 0.62in 0.55in 0.55in 0.5in; display: flex; flex-direction: column; min-width: 0; }
+  .lg-no { font-family: "Geist Mono", ui-monospace, monospace; color: var(--mute); font-size: 8.5pt; letter-spacing: 0.04em; }
+  .lg-main h1 { margin: 6px 0 0; font-size: 36pt; font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+  .lg-sub { margin-top: 10px; color: var(--mute); }
+  .lg-sub b { color: var(--ink); font-weight: 500; }
+  table.lg-items { width: 100%; border-collapse: collapse; margin-top: 0.5in; }
+  .lg-items th { font-family: "Geist Mono", ui-monospace, monospace; font-size: 6.8pt; font-weight: 400; text-transform: uppercase; letter-spacing: 0.12em; color: var(--mute); text-align: left; padding: 0 0 8px; border-bottom: 1px solid var(--ink); }
+  .lg-items td { padding: 8px 0; border-bottom: 1px solid var(--hair); }
+  .lg-items .n { text-align: right; width: 0.85in; font-family: "Geist Mono", ui-monospace, monospace; font-size: 9pt; }
+  .lg-items th.n { font-size: 6.8pt; }
+  .lg-sum { margin: 0.25in 0 0 auto; width: 2.5in; }
+  .lg-sum div { display: flex; justify-content: space-between; padding: 4px 0; color: var(--mute); }
+  .lg-sum div span:last-child { color: var(--ink); }
+  .lg-sum .bal { border-top: 1.5px solid var(--ink); margin-top: 6px; padding-top: 9px; font-weight: 600; color: var(--ink); }
+  .lg-thanks { margin-top: auto; color: var(--mute); }
+
+  /* ---------- Minimal ---------- */
+  .t-minimal { --ink: #1b1b1b; --mute: #8c8c8c; --hair: #e8e8e8;
+    font-family: "Work Sans", "Helvetica Neue", Arial, sans-serif; font-weight: 300; color: var(--ink); font-size: 9.5pt;
+    padding: 0.95in 1in 0.85in; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+  .mn-top { display: flex; justify-content: space-between; font-weight: 400; }
+  .mn-top .mute { color: var(--mute); font-weight: 300; }
+  .mn-meta { margin-top: 1.15in; display: grid; grid-template-columns: 1fr 1fr; gap: 0.4in; }
+  .mn-k { color: var(--mute); margin-bottom: 6px; }
+  .mn-to { line-height: 1.55; }
+  .mn-to .strong { font-weight: 400; }
+  .mn-dl { display: grid; grid-template-columns: 0.8in 1fr; row-gap: 7px; margin: 0; }
+  .mn-dl dt { color: var(--mute); }
+  .mn-dl dd { margin: 0; }
+  table.mn-items { width: 100%; border-collapse: collapse; margin-top: 0.8in; }
+  .mn-items th { font-weight: 300; color: var(--mute); text-align: left; padding: 0 0 9px; }
+  .mn-items td { padding: 9px 0; border-top: 1px solid var(--hair); }
+  .mn-items tr:last-child td { border-bottom: 1px solid var(--hair); }
+  .mn-items .n { text-align: right; width: 0.95in; }
+  .mn-sum { margin: 0.3in 0 0 auto; width: 2.6in; }
+  .mn-sum div { display: flex; justify-content: space-between; padding: 4px 0; }
+  .mn-sum div span:first-child { color: var(--mute); }
+  .mn-sum .bal { margin-top: 0.16in; align-items: baseline; }
+  .mn-sum .bal span:last-child { font-size: 20pt; letter-spacing: -0.02em; }
+  .mn-thanks { margin-top: auto; color: var(--mute); }
+
+  /* ---------- Carbon Copy (retro form) ---------- */
+  .t-carbon { --red: #a3302a; --line: rgba(163, 48, 42, .45); --bar: #f8ebe6; --ink: #2b2723; --paper: #fffdf7;
+    background: var(--paper); font-family: "Courier Prime", "Courier New", monospace; color: var(--ink); font-size: 10pt;
+    padding: 0.5in 0.6in 0.45in; display: flex; flex-direction: column; }
+  .cc-l { font-family: "Archivo Narrow", "Arial Narrow", sans-serif; font-weight: 700; font-size: 7pt; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); }
+  .cc-head { display: grid; grid-template-columns: 1fr 2.3in; border: 2px solid var(--red); }
+  .cc-from { padding: 0.14in 0.18in; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+  .cc-from .nm { font-family: "Archivo Narrow", "Arial Narrow", sans-serif; font-weight: 700; font-size: 21pt; text-transform: uppercase; letter-spacing: 0.04em; color: var(--red); line-height: 1; }
+  .cc-title { background: var(--red); color: var(--paper); padding: 0.12in 0.18in; display: flex; flex-direction: column; justify-content: center; }
+  .cc-title .t { font-family: "Archivo Narrow", "Arial Narrow", sans-serif; font-weight: 700; font-size: 25pt; letter-spacing: 0.2em; line-height: 1; }
+  .cc-title .no { margin-top: 6px; font-size: 13pt; }
+  .cc-title .no span { font-family: "Archivo Narrow", sans-serif; font-weight: 600; font-size: 9pt; letter-spacing: 0.1em; margin-right: 6px; }
+  .cc-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; border: 2px solid var(--red); border-top: 0; }
+  .cc-grid > div { padding: 6px 9px 9px; border-right: 1px solid var(--red); border-bottom: 1px solid var(--red); min-height: 0.52in; }
+  .cc-grid > div:nth-child(3), .cc-grid > div:nth-child(5) { border-right: 0; }
+  .cc-grid > div:nth-child(4), .cc-grid > div:nth-child(5) { border-bottom: 0; }
+  .cc-grid .to { grid-row: span 2; border-bottom: 0; }
+  .cc-grid .v { margin-top: 3px; line-height: 1.35; }
+  table.cc-items { width: 100%; border-collapse: collapse; margin-top: 0.22in; border: 2px solid var(--red); }
+  .cc-items th { background: var(--red); color: var(--paper); font-family: "Archivo Narrow", sans-serif; font-weight: 700; font-size: 7.5pt; letter-spacing: 0.14em; text-transform: uppercase; text-align: left; padding: 5px 8px; }
+  .cc-items td { height: 0.27in; padding: 0 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .cc-items td:last-child { border-right: 0; }
+  .cc-items tbody tr:nth-child(even) td { background: var(--bar); }
+  .cc-items .n { text-align: right; width: 1.05in; }
+  .cc-items th.n { text-align: right; }
+  .cc-items .hrs td { border-top: 1.5px solid var(--red); font-weight: 700; }
+  .cc-low { display: grid; grid-template-columns: 1fr 2.9in; gap: 0.3in; margin-top: 0.18in; align-items: center; }
+  .cc-stamp { justify-self: center; transform: rotate(-7deg); border: 3px double var(--red); border-radius: 6px; padding: 7px 14px; color: var(--red); font-family: "Archivo Narrow", sans-serif; font-weight: 700; font-size: 13pt; letter-spacing: 0.12em; text-transform: uppercase; text-align: center; max-width: 3.2in; opacity: .88; }
+  .cc-sum { border: 2px solid var(--red); }
+  .cc-sum div { display: flex; justify-content: space-between; align-items: center; padding: 5px 9px; border-bottom: 1px solid var(--red); }
+  .cc-sum div:last-child { border-bottom: 0; background: var(--red); color: var(--paper); font-weight: 700; font-size: 12pt; }
+  .cc-sum div:last-child .cc-l { color: var(--paper); font-size: 8pt; }
+  .cc-cut { margin-top: auto; border-top: 1.5px dashed var(--red); padding-top: 4px; text-align: center; }
+  .cc-stub { margin-top: 8px; display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.1fr; border: 2px solid var(--red); }
+  .cc-stub > div { padding: 5px 9px 7px; border-right: 1px solid var(--red); }
+  .cc-stub > div:last-child { border-right: 0; font-weight: 700; }
+  .cc-stub .v { margin-top: 3px; }
+
+  /* ---------- Letterhead (formal) ---------- */
+  .t-formal { --navy: #1e2945; --ink: #23262c; --mute: #666b75; --hair: #d8dbe1;
+    font-family: "EB Garamond", Garamond, "Times New Roman", serif; color: var(--ink); font-size: 11pt;
+    padding: 0.75in 0.95in 0.7in; display: flex; flex-direction: column; font-variant-numeric: lining-nums tabular-nums; }
+  .fm-lh { text-align: center; color: var(--navy); }
+  .fm-lh .nm { font-size: 21pt; font-weight: 500; text-transform: uppercase; letter-spacing: 0.24em; margin-right: -0.24em; }
+  .fm-rule { height: 5px; border-top: 2px solid var(--navy); border-bottom: 0.75px solid var(--navy); margin-top: 12px; }
+  .fm-title { margin-top: 0.42in; display: flex; justify-content: space-between; align-items: baseline; }
+  .fm-title h1 { margin: 0; font-size: 30pt; font-weight: 400; font-style: italic; color: var(--navy); line-height: 1; }
+  .fm-title .no { font-size: 12pt; color: var(--mute); }
+  .fm-sc { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.16em; color: var(--mute); }
+  .fm-row { margin-top: 0.36in; display: grid; grid-template-columns: 1fr 1fr; gap: 0.4in; }
+  .fm-to { line-height: 1.45; }
+  .fm-to .strong { font-weight: 600; font-size: 12pt; }
+  .fm-part { display: grid; grid-template-columns: auto 1fr; column-gap: 0.2in; row-gap: 4px; align-items: baseline; }
+  .fm-part dt { text-align: right; }
+  .fm-part dd { margin: 0; }
+  table.fm-items { width: 100%; border-collapse: collapse; margin-top: 0.45in; }
+  .fm-items th { text-align: left; font-weight: 400; padding: 7px 0; border-top: 2px solid var(--navy); border-bottom: 0.75px solid var(--navy); }
+  .fm-items td { padding: 6px 0; border-bottom: 0.75px solid var(--hair); }
+  .fm-items .n { text-align: right; width: 1.05in; }
+  .fm-items .hrs td { border-bottom: 0; font-style: italic; color: var(--mute); }
+  .fm-sum { margin: 0.12in 0 0 auto; width: 3in; }
+  .fm-sum div { display: flex; justify-content: space-between; padding: 3px 0; }
+  .fm-sum .bal { margin-top: 6px; padding-top: 7px; border-top: 0.75px solid var(--navy); font-weight: 600; color: var(--navy); }
+  .fm-sum .bal span:last-child { border-bottom: 3px double var(--navy); padding-bottom: 1px; }
+  .fm-remit { margin-top: 0.34in; font-style: italic; }
+  .fm-foot { margin-top: auto; text-align: center; }
+  .fm-foot .fm-rule { margin: 0 0 10px; height: 4px; border-top: 0.75px solid var(--navy); border-bottom: 2px solid var(--navy); }
+  .fm-foot .thanks2 { font-style: italic; color: var(--navy); font-size: 12pt; }
+
   @page { size: letter; margin: 0; }
   @media print {
     body { background: #fff; }
@@ -103,6 +271,9 @@
       <button class="b" id="newBtn" title="Next invoice number, today's date, clears the line items">New invoice</button>
     </div>
     <p class="hint">In the print dialog choose <b>Save as PDF</b>, paper size <b>Letter</b>, and turn <b>Headers and footers</b> off. Everything you type is saved automatically in this browser.</p>
+
+    <h2>Template</h2>
+    <div class="tpls" id="tpls" role="radiogroup" aria-label="Invoice template"></div>
 
     <h2>You</h2>
     <label>Your name (header)</label>
@@ -155,7 +326,7 @@
       <div><label>Sales tax (%)</label><input type="number" id="f_tax" step="0.01"></div>
       <div><label>Minimum table rows</label><input type="number" id="f_minRows" min="0" max="11"></div>
     </div>
-    <p class="hint">Empty rows pad the table like the template. 11 matches your invoice (12 rows including the hours total). Up to 11 line items fit on the page.</p>
+    <p class="hint">Empty rows pad the table in the Original and Carbon Copy templates. 11 matches your invoice (12 rows including the hours total). Up to 11 line items fit on the page.</p>
     <label>Footer message</label>
     <input id="f_thanks">
 
@@ -169,7 +340,8 @@
 
   <!-- ===================== INVOICE ===================== -->
   <main>
-    <div class="paper" id="paper">
+    <div class="paper t-classic" id="paper"></div>
+    <template id="tplClassic">
       <div class="inv-name" id="p_name"></div>
       <div class="inv-title">Invoice</div>
       <div class="inv-hr"></div>
@@ -211,7 +383,7 @@
       </table>
 
       <div class="thanks" id="p_thanks"></div>
-    </div>
+    </template>
   </main>
 </div>
 <div class="toast" id="toast"></div>
@@ -234,6 +406,20 @@
   const hrs = n => (Math.round(n * 100) / 100).toString();
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+  const money2 = n => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtLong = s => { const d = parseISO(s); return d ? d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : ""; };
+  const padNo = n => /^\d+$/.test(String(n).trim()) ? String(n).trim().padStart(4, "0") : String(n);
+  const lines = s => esc(s).replace(/\n/g, "<br>");
+
+  const TEMPLATES = [
+    { id: "classic", name: "Original", desc: "Your template", sw: "background:#e6efea;color:#5e5b96;font-family:InvoiceGothic,'Century Gothic',sans-serif;font-weight:700;letter-spacing:.06em" },
+    { id: "swiss",   name: "Swiss",    desc: "Modern, bold", sw: "background:#fff;color:#111214;font-family:'Schibsted Grotesk',sans-serif;font-weight:800;letter-spacing:-.04em;border-bottom:3px solid #111214;box-shadow:inset -10px 0 0 #e4412b" },
+    { id: "ledger",  name: "Ledger",   desc: "Modern, sidebar", sw: "background:linear-gradient(90deg,#1c2a2f 0 38%,#fff 38%);color:#f1b25b;font-family:'Geist Mono',monospace" },
+    { id: "minimal", name: "Minimal",  desc: "Quiet, airy", sw: "background:#fff;color:#1b1b1b;font-family:'Work Sans',sans-serif;font-weight:300;border-bottom:1px solid #e8e8e8" },
+    { id: "carbon",  name: "Carbon Copy", desc: "Retro form", sw: "background:#fffdf7;color:#a3302a;font-family:'Courier Prime',monospace;font-weight:700;border-bottom:2px dashed #a3302a" },
+    { id: "formal",  name: "Letterhead", desc: "Formal, serif", sw: "background:#fff;color:#1e2945;font-family:'EB Garamond',serif;font-style:italic;font-size:19px;border-bottom:4px double #1e2945" },
+  ];
+
   const defaults = {
     name: "",
     date: today(),
@@ -250,6 +436,7 @@
     prefix: "Development work",
     rate: "",
     hoursPerDay: 8,
+    template: "classic",
   };
 
   let state;
@@ -345,8 +532,8 @@
   $("printBtn").onclick = () => {
     const old = document.title;
     document.title = "Invoice " + state.number + " - " + (state.client || "");
-    window.print();
-    setTimeout(() => document.title = old, 500);
+    document.fonts.ready.then(() => window.print());
+    setTimeout(() => document.title = old, 1500);
   };
   $("exportBtn").onclick = () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
@@ -359,13 +546,174 @@
   $("importBtn").onclick = () => $("importFile").click();
   $("importFile").onchange = async e => {
     const f = e.target.files[0]; if (!f) return;
-    try { state = Object.assign({}, defaults, JSON.parse(await f.text())); fillForm(); update(); toast("Imported"); }
+    try { state = Object.assign({}, defaults, JSON.parse(await f.text())); fillForm(); renderPicker(); update(); toast("Imported"); }
     catch (err) { alert("That file could not be read: " + err.message); }
     e.target.value = "";
   };
 
+  // ---------- template picker ----------
+  function renderPicker() {
+    const box = $("tpls");
+    box.innerHTML = TEMPLATES.map(t =>
+      `<button type="button" class="tpl" role="radio" id="tpl_${t.id}" data-id="${t.id}" aria-checked="${state.template === t.id}">` +
+      `<span class="sw" style="${t.sw}">Aa 96</span><span class="nm">${t.name}</span><span class="ds">${t.desc}</span></button>`).join("");
+    box.querySelectorAll(".tpl").forEach(b => b.onclick = () => { state.template = b.dataset.id; renderPicker(); update(); });
+  }
+
+  // ---------- data shared by every template ----------
+  function invoiceData() {
+    let totalHours = 0, total = 0;
+    const items = state.items.map(it => {
+      const h = num(it.hours), r = num(it.rate);
+      const hasH = String(it.hours).trim() !== "", hasR = String(it.rate).trim() !== "";
+      const line = Math.round(h * r * 100) / 100;
+      totalHours += h; total += line;
+      return { desc: it.desc, h, r, line, hasH, hasR, hasNums: hasH || hasR };
+    });
+    const tax = Math.round(total * num(state.tax)) / 100;
+    return { items, totalHours, total, tax, balance: total + tax, pad: Math.max(0, num(state.minRows) - items.length) };
+  }
+
+  const R = {};
+
+  R.swiss = d => `
+    <div class="sw-top"><span class="who">${esc(state.name)}</span><span class="tag">Invoice ${esc(padNo(state.number))}</span></div>
+    <div class="sw-head"><h1>Invoice</h1><span class="num">№ ${esc(padNo(state.number))}</span></div>
+    <div class="sw-grid">
+      <div class="to"><div class="sw-k">Billed to</div><div class="sw-v"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}</div></div>
+      <div><div class="sw-k">Issued</div><div class="sw-v">${fmtDate(state.date)}</div></div>
+      <div><div class="sw-k">Due</div><div class="sw-v">${fmtDate(state.due)}</div></div>
+      <div><div class="sw-k">Terms</div><div class="sw-v">${esc(state.terms)}</div></div>
+      <div class="job"><div class="sw-k">Job</div><div class="sw-v">${esc(state.job)}</div></div>
+    </div>
+    <table class="sw-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n amt">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+    </tbody></table>
+    <div class="sw-foot">
+      <div><div class="sw-k">Total hours</div><div class="sw-hours">${hrs(d.totalHours)}<small> h</small></div><div class="sw-thanks">${esc(state.thanks)}</div></div>
+      <div class="sw-sum">
+        <div><span>Total</span><span>${money2(d.total)}</span></div>
+        <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+        <div class="bal"><span class="sw-k">Balance due</span><b>${money2(d.balance)}</b></div>
+        <div class="due">Due ${fmtDate(state.due)}</div>
+      </div>
+    </div>`;
+
+  R.ledger = d => `
+    <aside class="lg-side">
+      <div class="lg-name">${esc(state.name)}</div>
+      <div><div class="lg-k">Billed to</div><div class="lg-v"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}</div></div>
+      <div class="lg-pair">
+        <div><div class="lg-k">Issued</div><div class="lg-v mono">${fmtDate(state.date)}</div></div>
+        <div><div class="lg-k">Due</div><div class="lg-v mono">${fmtDate(state.due)}</div></div>
+        <div><div class="lg-k">Terms</div><div class="lg-v">${esc(state.terms)}</div></div>
+        <div><div class="lg-k">Invoice</div><div class="lg-v mono">${esc(padNo(state.number))}</div></div>
+      </div>
+      <div class="lg-due"><div class="lg-k">Balance due</div><div class="amt">${money2(d.balance)}</div><div class="by">by ${fmtDate(state.due)}</div></div>
+    </aside>
+    <section class="lg-main">
+      <div class="lg-no">INV-${esc(padNo(state.number))}</div>
+      <h1>Invoice</h1>
+      <div class="lg-sub">Job <b>${esc(state.job)}</b> · Terms <b>${esc(state.terms)}</b></div>
+      <table class="lg-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
+        ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+      </tbody></table>
+      <div class="lg-sum">
+        <div><span>Total hours</span><span class="mono">${hrs(d.totalHours)}</span></div>
+        <div><span>Total</span><span class="mono">${money2(d.total)}</span></div>
+        <div><span>Sales tax</span><span class="mono">${plain(d.tax)}</span></div>
+        <div class="bal"><span>Balance due</span><span class="mono">${money2(d.balance)}</span></div>
+      </div>
+      <div class="lg-thanks">${esc(state.thanks)}</div>
+    </section>`;
+
+  R.minimal = d => `
+    <div class="mn-top"><span>${esc(state.name)}</span><span><span class="mute">Invoice</span> ${esc(state.number)}</span></div>
+    <div class="mn-meta">
+      <div><div class="mn-k">Billed to</div><div class="mn-to"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}</div></div>
+      <dl class="mn-dl">
+        <dt>Date</dt><dd>${fmtDate(state.date)}</dd>
+        <dt>Due</dt><dd>${fmtDate(state.due)}</dd>
+        <dt>Terms</dt><dd>${esc(state.terms)}</dd>
+        <dt>Job</dt><dd>${esc(state.job)}</dd>
+      </dl>
+    </div>
+    <table class="mn-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+    </tbody></table>
+    <div class="mn-sum">
+      <div><span>Hours</span><span>${hrs(d.totalHours)}</span></div>
+      <div><span>Total</span><span>${money2(d.total)}</span></div>
+      <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+      <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
+    </div>
+    <div class="mn-thanks">${esc(state.thanks)}</div>`;
+
+  R.carbon = d => `
+    <div class="cc-head">
+      <div class="cc-from"><span class="cc-l">From</span><span class="nm">${esc(state.name)}</span></div>
+      <div class="cc-title"><span class="t">INVOICE</span><span class="no"><span>NO.</span>${esc(padNo(state.number))}</span></div>
+    </div>
+    <div class="cc-grid">
+      <div class="to"><div class="cc-l">Sold to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+      <div><div class="cc-l">Date</div><div class="v">${fmtDate(state.date)}</div></div>
+      <div><div class="cc-l">Due date</div><div class="v">${fmtDate(state.due)}</div></div>
+      <div><div class="cc-l">Job</div><div class="v">${esc(state.job)}</div></div>
+      <div><div class="cc-l">Terms</div><div class="v">${esc(state.terms)}</div></div>
+    </div>
+    <table class="cc-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+      ${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(d.pad)}
+      <tr class="hrs"><td><span class="cc-l">Total hours</span></td><td class="n">${hrs(d.totalHours)}</td><td></td><td></td></tr>
+    </tbody></table>
+    <div class="cc-low">
+      <div class="cc-stamp">${esc(state.thanks)}</div>
+      <div class="cc-sum">
+        <div><span class="cc-l">Total</span><span>${money2(d.total)}</span></div>
+        <div><span class="cc-l">Sales tax</span><span>${plain(d.tax)}</span></div>
+        <div><span class="cc-l">Balance due</span><span>${money2(d.balance)}</span></div>
+      </div>
+    </div>
+    <div class="cc-cut"><span class="cc-l">Detach and return this part with your payment</span></div>
+    <div class="cc-stub">
+      <div><div class="cc-l">Pay to</div><div class="v">${esc(state.name)}</div></div>
+      <div><div class="cc-l">Invoice no.</div><div class="v">${esc(padNo(state.number))}</div></div>
+      <div><div class="cc-l">Due date</div><div class="v">${fmtDate(state.due)}</div></div>
+      <div><div class="cc-l">Amount due</div><div class="v">${money2(d.balance)}</div></div>
+    </div>`;
+
+  R.formal = d => `
+    <div class="fm-lh"><div class="nm">${esc(state.name)}</div><div class="fm-rule"></div></div>
+    <div class="fm-title"><h1>Invoice</h1><span class="no"><span class="fm-sc">No.</span> ${esc(state.number)}</span></div>
+    <div class="fm-row">
+      <div><div class="fm-sc">Billed to</div><div class="fm-to" style="margin-top:6px"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}</div></div>
+      <dl class="fm-part">
+        <dt class="fm-sc">Date of issue</dt><dd>${fmtLong(state.date)}</dd>
+        <dt class="fm-sc">Payment due</dt><dd>${fmtLong(state.due)}</dd>
+        <dt class="fm-sc">Terms</dt><dd>${esc(state.terms)}</dd>
+        <dt class="fm-sc">Job</dt><dd>${esc(state.job)}</dd>
+      </dl>
+    </div>
+    <table class="fm-items"><thead><tr><th class="fm-sc">Description</th><th class="fm-sc n">Hours</th><th class="fm-sc n">Rate</th><th class="fm-sc n">Amount</th></tr></thead><tbody>
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+      <tr class="hrs"><td>Total hours</td><td class="n">${hrs(d.totalHours)}</td><td></td><td></td></tr>
+    </tbody></table>
+    <div class="fm-sum">
+      <div><span>Total</span><span>${money2(d.total)}</span></div>
+      <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+      <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
+    </div>
+    <div class="fm-remit">Kindly remit payment by ${fmtLong(state.due)}.</div>
+    <div class="fm-foot"><div class="fm-rule"></div><div class="thanks2">${esc(state.thanks)}</div></div>`;
+
   // ---------- preview ----------
   function update() {
+    const paper = $("paper");
+    const tpl = R[state.template] ? state.template : "classic";
+    paper.className = "paper t-" + tpl;
+    if (tpl !== "classic") { paper.innerHTML = R[tpl](invoiceData()); save(); return; }
+    paper.innerHTML = $("tplClassic").innerHTML;
+
     $("p_name").textContent = state.name;
     $("p_date").textContent = fmtDate(state.date);
     $("p_number").textContent = state.number;
@@ -399,6 +747,7 @@
   }
 
   fillForm();
+  renderPicker();
   $("g_month").value = defaultMonth();
   update();
 })();
