@@ -6,7 +6,7 @@
 <title>Invoice Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Work+Sans:wght@300;400;500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Archivo+Narrow:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Work+Sans:wght@300;400;500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Archivo+Narrow:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Poiret+One&family=Josefin+Sans:wght@300;400;600;700&family=Space+Mono:wght@400;700&family=Archivo+Black&display=swap" rel="stylesheet">
 <style>
   /* Century Gothic when installed, otherwise TeX Gyre Adventor (free look-alike with a real bold) */
   @font-face { font-family: "InvoiceGothic"; font-weight: 400; src: local("Century Gothic"), local("CenturyGothic"), url("fonts/texgyreadventor-regular.otf") format("opentype"); }
@@ -96,13 +96,13 @@
   .strip-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; font-size: 12px; color: var(--ui-mute); }
   .strip-h b { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
   .tpls { display: flex; gap: 12px; overflow-x: auto; padding: 3px 3px 6px; scrollbar-width: thin; }
-  .tpl { flex: 0 0 auto; width: 92px; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; }
+  .tpl { flex: 0 0 auto; width: 92px; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; display: flex; flex-direction: column; justify-content: flex-start; }
   .thumb { display: block; width: 92px; height: 119px; position: relative; overflow: hidden; border-radius: 4px; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.08); transition: transform .15s, box-shadow .15s; }
   .thumb .paper { position: absolute; left: 0; top: 0; margin: 0; transform: scale(0.11275); transform-origin: 0 0; box-shadow: none; pointer-events: none; }
   .tpl:hover .thumb { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(0,0,0,.12), 0 6px 14px rgba(0,0,0,.12); }
   .tpl[aria-checked="true"] .thumb { box-shadow: 0 0 0 2px var(--ui-accent), 0 6px 14px rgba(94, 91, 150, .25); }
   .tpl .nm { display: block; margin-top: 7px; font-size: 12.5px; font-weight: 600; }
-  .tpl .ds { display: block; font-size: 11.5px; color: var(--ui-mute); }
+  .tpl .ds { display: block; font-size: 11.5px; color: var(--ui-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tpl[aria-checked="true"] .nm { color: var(--ui-accent); }
 
   .sheet-area { flex: 1; padding: 28px 20px 48px; display: flex; justify-content: center; }
@@ -417,7 +417,7 @@
   .bh-info .row span:first-child { color: var(--mute); }
   table.bh-items { width: 100%; border-collapse: collapse; margin-top: 0.32in; }
   .bh-items th { background: var(--ink); color: #fff; font-size: 7.5pt; font-weight: 800; font-stretch: 112%; letter-spacing: 0.1em; text-transform: uppercase; text-align: left; padding: 6px 8px; }
-  .bh-items td { padding: 7px 8px; border-bottom: 1.5px solid var(--ink); }
+  .bh-items td { padding: 7px 8px; border-bottom: 1.5px solid var(--ink); word-spacing: 0.12em; }
   .bh-items .n { text-align: right; width: 0.95in; }
   .bh-items td.amt { font-weight: 700; }
   .bh-low { margin-top: auto; display: grid; grid-template-columns: 1fr 3.4in; align-items: stretch; }
@@ -427,6 +427,184 @@
   .bh-bal { background: var(--yellow); padding: 14px 18px 16px; display: flex; flex-direction: column; justify-content: space-between; }
   .bh-bal b { font-size: 36pt; font-weight: 900; font-stretch: 112%; letter-spacing: -0.02em; line-height: 1; margin-top: 10px; }
   .bh-bal .by { margin-top: 6px; font-weight: 600; }
+
+  /* ---------- Mono (plain-text) ---------- */
+  .t-mono { --ink: #1c1c1c; --mute: #8a8a85; font-family: "JetBrains Mono", ui-monospace, monospace; color: var(--ink); font-size: 9.5pt; line-height: 1.55;
+    padding: 0.85in 0.9in 0.8in; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+  .mo-rule { overflow: hidden; white-space: nowrap; color: var(--mute); margin: 10px 0; line-height: 1; }
+  .mo-rule::before { content: "----------------------------------------------------------------------------------------------------------------------------------------"; }
+  .mo-rule.eq::before { content: "========================================================================================================================================"; color: var(--ink); }
+  .mo-head { display: flex; justify-content: space-between; font-weight: 700; font-size: 11pt; }
+  .mo-head .h { color: var(--mute); font-weight: 400; }
+  .mo-kv { display: grid; grid-template-columns: 0.9in 1fr; }
+  .mo-kv dt { color: var(--mute); }
+  .mo-kv dd { margin: 0; }
+  table.mo-items { width: 100%; border-collapse: collapse; }
+  .mo-items th { font-weight: 400; color: var(--mute); text-align: left; padding: 0 0 4px; }
+  .mo-items td { padding: 2px 0; }
+  .mo-items .n { text-align: right; width: 0.95in; }
+  .mo-sum { display: grid; grid-template-columns: 1fr 1.25in 1.1in; row-gap: 2px; }
+  .mo-sum span:nth-child(3n+2) { color: var(--mute); text-align: right; padding-right: 14px; }
+  .mo-sum span:nth-child(3n) { text-align: right; }
+  .mo-sum .b { font-weight: 700; color: var(--ink) !important; }
+  .mo-thx { color: var(--mute); }
+  .mo-end { margin-top: auto; color: var(--mute); font-size: 8pt; display: flex; justify-content: space-between; }
+
+  /* ---------- Tiles (dashboard) ---------- */
+  .t-tiles { --ink: #101828; --mute: #667085; --soft: #f2f4f7; --line: #e4e7ec; --accent: #0e7c66;
+    font-family: "Manrope", "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 9.5pt;
+    padding: 0.6in 0.65in 0.55in; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+  .ti-top { display: flex; justify-content: space-between; align-items: center; }
+  .ti-who { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 12pt; }
+  .ti-who i { width: 30px; height: 30px; border-radius: 8px; background: var(--ink); color: #fff; font-style: normal; font-size: 10pt; display: grid; place-items: center; letter-spacing: 0.02em; }
+  .ti-badge { font-size: 8.5pt; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: #e3f4ef; color: var(--accent); }
+  .ti-h1 { margin: 0.36in 0 0; font-size: 30pt; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .ti-h1 span { color: var(--mute); font-weight: 600; }
+  .ti-tiles { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin-top: 0.26in; }
+  .ti-tile { background: var(--soft); border-radius: 12px; padding: 12px 14px 14px; }
+  .ti-tile .k { font-size: 7.5pt; font-weight: 600; color: var(--mute); }
+  .ti-tile .v { font-size: 17pt; font-weight: 700; letter-spacing: -0.02em; margin-top: 6px; line-height: 1.05; }
+  .ti-tile .s { font-size: 8pt; color: var(--mute); margin-top: 3px; }
+  .ti-tile.dark { background: var(--ink); color: #fff; }
+  .ti-tile.dark .k, .ti-tile.dark .s { color: #98a2b3; }
+  .ti-tile.dark .v { font-size: 22pt; }
+  .ti-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .ti-info > div { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .ti-info .k { font-size: 7.5pt; font-weight: 600; color: var(--mute); margin-bottom: 5px; }
+  .ti-info .v { line-height: 1.5; }
+  .ti-info .row { display: flex; justify-content: space-between; }
+  .ti-info .row span:first-child { color: var(--mute); }
+  .ti-table { margin-top: 0.24in; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  table.ti-items { width: 100%; border-collapse: collapse; }
+  .ti-items th { background: var(--soft); font-size: 7.5pt; font-weight: 600; color: var(--mute); text-align: left; padding: 8px 14px; }
+  .ti-items td { padding: 8px 14px; border-top: 1px solid var(--line); }
+  .ti-items .n { text-align: right; width: 0.95in; }
+  .ti-items td.amt { font-weight: 700; }
+  .ti-items tfoot td { background: var(--soft); font-weight: 600; }
+  .ti-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--line); color: var(--mute); }
+  .ti-foot b { color: var(--ink); }
+
+  /* ---------- Monogram (classic) ---------- */
+  .t-monogram { --wine: #6b2335; --gold: #b39463; --ink: #2a2326; --mute: #7c7275;
+    font-family: "Cormorant Garamond", Garamond, "Times New Roman", serif; color: var(--ink); font-size: 12pt;
+    padding: 0.6in 0.95in 0.6in; display: flex; flex-direction: column; font-variant-numeric: lining-nums tabular-nums; }
+  .mg-head { text-align: center; }
+  .mg-mark { width: 0.95in; height: 0.95in; margin: 0 auto; border-radius: 50%; border: 1px solid var(--gold); display: grid; place-items: center; position: relative; }
+  .mg-mark::before { content: ""; position: absolute; inset: 4px; border-radius: 50%; border: 0.5px solid var(--gold); }
+  .mg-mark span { font-style: italic; font-weight: 500; font-size: 28pt; color: var(--wine); letter-spacing: -0.02em; line-height: 1; }
+  .mg-name { margin-top: 12px; font-size: 11pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.32em; margin-right: -0.32em; color: var(--wine); }
+  .mg-orn { display: flex; align-items: center; gap: 12px; margin: 16px auto 0; width: 3.4in; color: var(--gold); }
+  .mg-orn::before, .mg-orn::after { content: ""; flex: 1; border-top: 0.75px solid var(--gold); }
+  .mg-orn span { font-size: 9pt; }
+  .mg-title { margin-top: 0.28in; text-align: center; font-style: italic; font-size: 26pt; font-weight: 400; color: var(--wine); line-height: 1; }
+  .mg-sub { text-align: center; color: var(--mute); margin-top: 6px; font-size: 11pt; }
+  .mg-sc { font-size: 8pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold); }
+  .mg-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5in; margin-top: 0.38in; }
+  .mg-cols .v { margin-top: 6px; line-height: 1.4; }
+  .mg-cols .v b { font-weight: 600; font-size: 13pt; }
+  .mg-lead { display: flex; align-items: baseline; gap: 6px; }
+  .mg-lead i { flex: 1; border-bottom: 1px dotted var(--gold); transform: translateY(-4px); }
+  table.mg-items { width: 100%; border-collapse: collapse; margin-top: 0.36in; }
+  .mg-items th { text-align: left; padding: 0 0 7px; border-bottom: 0.75px solid var(--gold); }
+  .mg-items td { padding: 6px 0; border-bottom: 0.5px solid #e7ddd0; }
+  .mg-items .n { text-align: right; width: 1.0in; }
+  .mg-sum { margin: 0.16in 0 0 auto; width: 3in; display: grid; gap: 3px; }
+  .mg-sum .bal { margin-top: 6px; padding-top: 8px; border-top: 0.75px solid var(--gold); font-weight: 600; color: var(--wine); font-size: 14pt; }
+  .mg-foot { margin-top: auto; text-align: center; font-style: italic; font-size: 14pt; color: var(--wine); }
+
+  /* ---------- Art Deco (retro) ---------- */
+  .t-deco { --gold: #a9812f; --gold-soft: #d9c08a; --ink: #141414; --mute: #6a6458;
+    font-family: "Josefin Sans", "Futura", "Century Gothic", sans-serif; color: var(--ink); font-size: 9.5pt; font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums; }
+  .dc-frame { position: absolute; inset: 0.42in; border: 2px solid var(--ink); padding: 0.32in 0.4in 0.3in; display: flex; flex-direction: column; }
+  .dc-frame::before { content: ""; position: absolute; inset: 6px; border: 1px solid var(--gold); pointer-events: none; }
+  .dc-corner { position: absolute; width: 22px; height: 22px; border: 2px solid var(--ink); background: #fff; }
+  .dc-corner::after { content: ""; position: absolute; inset: 4px; background: var(--gold); }
+  .dc-corner.tl { left: -12px; top: -12px; } .dc-corner.tr { right: -12px; top: -12px; }
+  .dc-corner.bl { left: -12px; bottom: -12px; } .dc-corner.br { right: -12px; bottom: -12px; }
+  .dc-fan { width: 2.6in; height: 1.3in; margin: 0 auto; border-radius: 1.3in 1.3in 0 0; overflow: hidden; position: relative;
+    background: repeating-conic-gradient(from -90deg at 50% 100%, var(--gold) 0 4deg, transparent 4deg 10deg); }
+  .dc-fan::after { content: ""; position: absolute; left: 50%; bottom: -0.5in; width: 1in; height: 1in; transform: translateX(-50%); border-radius: 50%; background: #fff; border: 2px solid var(--ink); }
+  .dc-title { text-align: center; margin-top: 10px; font-family: "Poiret One", "Josefin Sans", sans-serif; font-size: 40pt; letter-spacing: 0.32em; margin-right: -0.32em; line-height: 1; }
+  .dc-name { text-align: center; margin-top: 8px; font-weight: 600; font-size: 9.5pt; text-transform: uppercase; letter-spacing: 0.3em; color: var(--gold); }
+  .dc-k { font-weight: 700; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.22em; color: var(--gold); margin-bottom: 4px; }
+  .dc-info { display: grid; grid-template-columns: 1.2fr 1fr 1fr; margin-top: 0.26in; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+  .dc-info > div { padding: 10px 12px; }
+  .dc-info > div + div { border-left: 1px solid var(--gold-soft); }
+  .dc-info .v { line-height: 1.45; }
+  table.dc-items { width: 100%; border-collapse: collapse; margin-top: 0.22in; }
+  .dc-items th { font-weight: 700; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.22em; color: var(--gold); text-align: left; padding: 0 0 7px; border-bottom: 2px solid var(--ink); }
+  .dc-items td { padding: 6px 0 5px; border-bottom: 1px solid var(--gold-soft); }
+  .dc-items .n { text-align: right; width: 0.95in; }
+  .dc-low { margin-top: auto; display: grid; grid-template-columns: 1fr 3in; gap: 0.3in; align-items: end; }
+  .dc-thx { font-family: "Poiret One", sans-serif; font-size: 15pt; letter-spacing: 0.06em; }
+  .dc-sum div { display: flex; justify-content: space-between; padding: 3px 0; }
+  .dc-sum .bal { margin-top: 6px; background: var(--ink); color: var(--gold-soft); padding: 9px 12px; align-items: baseline; }
+  .dc-sum .bal b { font-size: 16pt; font-weight: 600; color: #fff; letter-spacing: 0.02em; }
+
+  /* ---------- Receipt (thermal) ---------- */
+  .t-receipt { --ink: #222; --mute: #777; background: #f1f1ee; font-family: "Space Mono", ui-monospace, monospace; color: var(--ink); font-size: 8.5pt; line-height: 1.45;
+    display: flex; justify-content: center; align-items: center; font-variant-numeric: tabular-nums; }
+  .rc-slip { width: 3.7in; background: #fff; padding: 0.4in 0.3in; position: relative; filter: drop-shadow(0 2px 6px rgba(0,0,0,.12)); }
+  .rc-slip::before, .rc-slip::after { content: ""; position: absolute; left: 0; right: 0; height: 10px;
+    background: linear-gradient(-45deg, transparent 7px, #fff 0) 0 0 / 14px 10px repeat-x, linear-gradient(45deg, transparent 7px, #fff 0) 0 0 / 14px 10px repeat-x; }
+  .rc-slip::before { top: -10px; transform: scaleY(-1); }
+  .rc-slip::after { bottom: -10px; }
+  .rc-c { text-align: center; }
+  .rc-name { font-weight: 700; font-size: 12pt; text-transform: uppercase; letter-spacing: 0.04em; }
+  .rc-dash { border-top: 1.5px dashed var(--ink); margin: 10px 0; }
+  .rc-row { display: flex; justify-content: space-between; gap: 10px; }
+  .rc-row span:first-child { color: var(--mute); }
+  .rc-item { margin: 0 0 6px; }
+  .rc-item .d { font-weight: 700; }
+  .rc-item .rc-row span:first-child { color: var(--mute); }
+  .rc-tot .rc-row { padding: 1px 0; }
+  .rc-bal { font-weight: 700; font-size: 12pt; }
+  .rc-bal span:first-child { color: var(--ink) !important; }
+  .rc-bar { height: 0.5in; margin: 12px 0 4px; }
+  .rc-thx { text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+
+  /* ---------- Brutalist (bold) ---------- */
+  .t-brutal { --ink: #111; --pink: #ff9fb2; --blue: #a9bcff; --yellow: #ffe169; --bg: #fffaf0;
+    background: var(--bg); font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 9.5pt;
+    padding: 0.5in 0.55in 0.55in; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+  .t-brutal .mono { font-family: "Space Mono", ui-monospace, monospace; }
+  .br-box { border: 2.5px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); background: #fff; }
+  .br-head { display: flex; justify-content: space-between; align-items: stretch; position: relative; }
+  .br-head .l { padding: 14px 18px; }
+  .br-head h1 { margin: 0; font-family: "Archivo Black", "Archivo", sans-serif; font-weight: 400; font-size: 54pt; line-height: 0.85; letter-spacing: -0.03em; text-transform: uppercase; }
+  .br-head .nm { margin-top: 10px; font-weight: 700; font-size: 12pt; }
+  .br-head .r { background: var(--yellow); border-left: 2.5px solid var(--ink); padding: 14px 18px; display: flex; flex-direction: column; justify-content: center; min-width: 1.8in; }
+  .br-k { font-family: "Space Mono", monospace; font-weight: 700; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.06em; }
+  .br-head .r b { font-family: "Archivo Black", sans-serif; font-weight: 400; font-size: 26pt; line-height: 1; margin-top: 4px; }
+  .br-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 14px; margin-top: 18px; }
+  .br-grid > div { padding: 10px 12px; }
+  .br-grid > div:nth-child(2) { background: var(--blue); }
+  .br-grid .v { margin-top: 5px; line-height: 1.45; }
+  .br-grid .v b { font-weight: 800; }
+  .br-table { margin-top: 20px; }
+  table.br-items { width: 100%; border-collapse: collapse; }
+  .br-items th { font-family: "Space Mono", monospace; font-weight: 700; font-size: 7.5pt; text-transform: uppercase; text-align: left; padding: 8px 10px; border-bottom: 2.5px solid var(--ink); background: var(--ink); color: #fff; }
+  .br-items td { padding: 7px 10px; border-bottom: 1.5px solid var(--ink); word-spacing: 0.12em; }
+  .br-items tr:last-child td { border-bottom: 0; }
+  .br-items .n { text-align: right; width: 0.95in; font-family: "Space Mono", monospace; font-size: 8.5pt; }
+  .br-low { margin-top: auto; display: grid; grid-template-columns: 1fr 3.1in; gap: 18px; align-items: end; }
+  .br-thx { font-family: "Archivo Black", sans-serif; font-size: 15pt; line-height: 1.1; text-transform: uppercase; transform: rotate(-2deg); display: inline-block; background: var(--blue); border: 2.5px solid var(--ink); padding: 6px 10px; }
+  .br-sum > div { display: flex; justify-content: space-between; padding: 6px 12px; border-bottom: 2px solid var(--ink); }
+  .br-sum > div:last-child { border-bottom: 0; background: var(--pink); padding: 10px 12px; align-items: baseline; }
+  .br-sum > div:last-child b { font-family: "Archivo Black", sans-serif; font-weight: 400; font-size: 20pt; }
+
+  /* ---------- Template strip categories ---------- */
+  .cats { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .chip { height: 28px; padding: 0 11px; border-radius: 999px; border: 1px solid var(--ui-line); background: var(--ui-panel); cursor: pointer; font-size: 12.5px; font-weight: 500; color: var(--ui-mute); }
+  .chip:hover { color: var(--ui-ink); border-color: #cfd2d9; }
+  .chip[aria-pressed="true"] { background: var(--ui-ink); border-color: var(--ui-ink); color: #fff; }
+  .chip small { font-size: 11px; opacity: .7; margin-left: 4px; }
+  .chip:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
+  .tgroup { flex: 0 0 auto; display: flex; flex-direction: column; }
+  .tgroup + .tgroup { border-left: 1px solid #d5d7dd; padding-left: 12px; }
+  .tgroup-h { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ui-mute); margin: 0 0 6px; height: 14px; }
+  .tgroup-row { display: flex; gap: 12px; }
 
   @page { size: letter; margin: 0; }
   @media print {
@@ -523,6 +701,7 @@
   <main class="stage" id="stage">
     <div class="strip">
       <div class="strip-h"><b>Template</b><span id="tplName"></span></div>
+      <div class="cats" id="cats" role="group" aria-label="Template category"></div>
       <div class="tpls" id="tpls" role="radiogroup" aria-label="Invoice template"></div>
     </div>
     <div class="sheet-area" id="sheetArea">
@@ -597,17 +776,32 @@
   const padNo = n => /^\d+$/.test(String(n).trim()) ? String(n).trim().padStart(4, "0") : String(n);
   const lines = s => esc(s).replace(/\n/g, "<br>");
 
-  const TEMPLATES = [
-    { id: "classic",   name: "Original",    desc: "Your template" },
-    { id: "swiss",     name: "Swiss",       desc: "Modern, bold" },
-    { id: "ledger",    name: "Ledger",      desc: "Modern, sidebar" },
-    { id: "editorial", name: "Editorial",   desc: "Magazine serif" },
-    { id: "minimal",   name: "Minimal",     desc: "Quiet, airy" },
-    { id: "blueprint", name: "Blueprint",   desc: "Technical drawing" },
-    { id: "bauhaus",   name: "Bauhaus",     desc: "Colour blocks" },
-    { id: "carbon",    name: "Carbon Copy", desc: "Retro form" },
-    { id: "formal",    name: "Letterhead",  desc: "Formal, serif" },
+  const CATEGORIES = [
+    { id: "yours",   name: "Yours" },
+    { id: "modern",  name: "Modern" },
+    { id: "minimal", name: "Minimal" },
+    { id: "classic", name: "Classic" },
+    { id: "retro",   name: "Retro" },
+    { id: "bold",    name: "Bold" },
   ];
+  const TEMPLATES = [
+    { id: "classic",   cat: "yours",   name: "Original",    desc: "Your template" },
+    { id: "swiss",     cat: "modern",  name: "Swiss",       desc: "Big type" },
+    { id: "ledger",    cat: "modern",  name: "Ledger",      desc: "Dark sidebar" },
+    { id: "tiles",     cat: "modern",  name: "Tiles",       desc: "Dashboard cards" },
+    { id: "minimal",   cat: "minimal", name: "Minimal",     desc: "Quiet, airy" },
+    { id: "mono",      cat: "minimal", name: "Mono",        desc: "Plain text" },
+    { id: "formal",    cat: "classic", name: "Letterhead",  desc: "Formal serif" },
+    { id: "editorial", cat: "classic", name: "Editorial",   desc: "Magazine serif" },
+    { id: "monogram",  cat: "classic", name: "Monogram",    desc: "Initials crest" },
+    { id: "carbon",    cat: "retro",   name: "Carbon Copy", desc: "Red-ink form" },
+    { id: "blueprint", cat: "retro",   name: "Blueprint",   desc: "Drafting sheet" },
+    { id: "deco",      cat: "retro",   name: "Art Deco",    desc: "Gold and black" },
+    { id: "receipt",   cat: "retro",   name: "Receipt",     desc: "Till slip" },
+    { id: "bauhaus",   cat: "bold",    name: "Bauhaus",     desc: "Colour blocks" },
+    { id: "brutal",    cat: "bold",    name: "Brutalist",   desc: "Hard shadows" },
+  ];
+  let catFilter = "all";
 
   const defaults = {
     name: "",
@@ -1000,6 +1194,159 @@
       <div class="bh-bal"><span class="bh-k">Balance due</span><b>${money2(d.balance)}</b><span class="by">by ${fmtDate(state.due)}</span></div>
     </div>`;
 
+  const initials = n => String(n || "").trim().split(/\s+/).filter(Boolean).map(w => w[0]).slice(0, 3).join("").toUpperCase() || "—";
+  const isoDate = s => s || "";
+
+  R.mono = d => `
+    <div class="mo-head"><span><span class="h">#</span> INVOICE ${esc(padNo(state.number))}</span><span>${isoDate(state.date)}</span></div>
+    <div class="mo-rule"></div>
+    <dl class="mo-kv">
+      <dt>from</dt><dd>${esc(state.name)}</dd>
+      <dt>to</dt><dd>${esc(state.client)}<br>${lines(state.addr)}</dd>
+      <dt>job</dt><dd>${esc(state.job)}</dd>
+      <dt>terms</dt><dd>${esc(state.terms)}</dd>
+      <dt>issued</dt><dd>${fmtDate(state.date)}</dd>
+      <dt>due</dt><dd>${fmtDate(state.due)}</dd>
+    </dl>
+    <div class="mo-rule"></div>
+    <table class="mo-items"><thead><tr><th>description</th><th class="n">hours</th><th class="n">rate</th><th class="n">amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
+    <div class="mo-rule"></div>
+    <div class="mo-sum">
+      <span>${hrs(d.totalHours)} h</span><span>total</span><span>${money2(d.total)}</span>
+      <span></span><span>sales tax</span><span>${plain(d.tax)}</span>
+      <span></span><span class="b">balance due</span><span class="b">${money2(d.balance)}</span>
+    </div>
+    <div class="mo-rule eq"></div>
+    <div class="mo-thx">// ${esc(state.thanks)}</div>
+    <div class="mo-end"><span>${esc(state.name)}</span><span>EOF</span></div>`;
+
+  R.tiles = d => `
+    <div class="ti-top"><div class="ti-who"><i>${esc(initials(state.name))}</i>${esc(state.name)}</div><span class="ti-badge">${esc(state.terms)}</span></div>
+    <h1 class="ti-h1">Invoice <span>#${esc(padNo(state.number))}</span></h1>
+    <div class="ti-tiles">
+      <div class="ti-tile dark"><div class="k">Balance due</div><div class="v">${money2(d.balance)}</div><div class="s">by ${fmtDate(state.due)}</div></div>
+      <div class="ti-tile"><div class="k">Hours</div><div class="v">${hrs(d.totalHours)}</div><div class="s">${d.items.length} line item${d.items.length === 1 ? "" : "s"}</div></div>
+      <div class="ti-tile"><div class="k">Issued</div><div class="v">${fmtDate(state.date)}</div><div class="s">Due ${fmtDate(state.due)}</div></div>
+    </div>
+    <div class="ti-info">
+      <div><div class="k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+      <div><div class="k">Details</div><div class="v"><div class="row"><span>Job</span><span>${esc(state.job)}</span></div><div class="row"><span>Terms</span><span>${esc(state.terms)}</span></div><div class="row"><span>Due date</span><span>${fmtDate(state.due)}</span></div></div></div>
+    </div>
+    <div class="ti-table"><table class="ti-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead>
+      <tbody>${rows(d, "amt")}</tbody>
+      <tfoot>
+        <tr><td>Total</td><td class="n">${hrs(d.totalHours)}</td><td></td><td class="n">${money2(d.total)}</td></tr>
+        <tr><td>Sales tax</td><td></td><td></td><td class="n">${plain(d.tax)}</td></tr>
+        <tr><td><b>Balance due</b></td><td></td><td></td><td class="n"><b>${money2(d.balance)}</b></td></tr>
+      </tfoot></table></div>
+    <div class="ti-foot"><span>${esc(state.thanks)}</span><span>Invoice <b>#${esc(padNo(state.number))}</b></span></div>`;
+
+  R.monogram = d => `
+    <div class="mg-head">
+      <div class="mg-mark"><span>${esc(initials(state.name))}</span></div>
+      <div class="mg-name">${esc(state.name)}</div>
+      <div class="mg-orn"><span>◆</span></div>
+    </div>
+    <div class="mg-title">Invoice</div>
+    <div class="mg-sub">No. ${esc(state.number)} · ${fmtLong(state.date)}</div>
+    <div class="mg-cols">
+      <div><div class="mg-sc">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+      <div><div class="mg-sc">Particulars</div><div class="v">
+        <div class="mg-lead"><span>Job</span><i></i><span>${esc(state.job)}</span></div>
+        <div class="mg-lead"><span>Terms</span><i></i><span>${esc(state.terms)}</span></div>
+        <div class="mg-lead"><span>Due</span><i></i><span>${fmtLong(state.due)}</span></div>
+      </div></div>
+    </div>
+    <table class="mg-items"><thead><tr><th class="mg-sc">Description</th><th class="mg-sc n">Hours</th><th class="mg-sc n">Rate</th><th class="mg-sc n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
+    <div class="mg-sum">
+      <div class="mg-lead"><span>Total hours</span><i></i><span>${hrs(d.totalHours)}</span></div>
+      <div class="mg-lead"><span>Total</span><i></i><span>${money2(d.total)}</span></div>
+      <div class="mg-lead"><span>Sales tax</span><i></i><span>${plain(d.tax)}</span></div>
+      <div class="mg-lead bal"><span>Balance due</span><i></i><span>${money2(d.balance)}</span></div>
+    </div>
+    <div class="mg-foot">${esc(state.thanks)}</div>`;
+
+  R.deco = d => `
+    <div class="dc-frame">
+      <i class="dc-corner tl"></i><i class="dc-corner tr"></i><i class="dc-corner bl"></i><i class="dc-corner br"></i>
+      <div class="dc-fan"></div>
+      <div class="dc-title">INVOICE</div>
+      <div class="dc-name">${esc(state.name)}</div>
+      <div class="dc-info">
+        <div><div class="dc-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+        <div><div class="dc-k">Invoice</div><div class="v">No. ${esc(padNo(state.number))}<br>Issued ${fmtDate(state.date)}<br>Due ${fmtDate(state.due)}</div></div>
+        <div><div class="dc-k">Engagement</div><div class="v">${esc(state.job)}<br>${esc(state.terms)}</div></div>
+      </div>
+      <table class="dc-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
+      <div class="dc-low">
+        <div class="dc-thx">${esc(state.thanks)}</div>
+        <div class="dc-sum">
+          <div><span>Total hours</span><span>${hrs(d.totalHours)}</span></div>
+          <div><span>Total</span><span>${money2(d.total)}</span></div>
+          <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+          <div class="bal"><span class="dc-k" style="margin:0;color:inherit">Balance due</span><b>${money2(d.balance)}</b></div>
+        </div>
+      </div>
+    </div>`;
+
+  function barcode(seed) {
+    let h = 2166136261;
+    for (const c of String(seed)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+    let x = 0, out = "";
+    while (x < 300) {
+      h = Math.imul(h ^ (h >>> 13), 1103515245) >>> 0;
+      const w = 1 + (h % 4), gap = 1 + ((h >>> 8) % 3);
+      out += `<rect x="${x}" y="0" width="${w}" height="60"/>`;
+      x += w + gap;
+    }
+    return `<svg class="rc-bar" viewBox="0 0 ${x} 60" preserveAspectRatio="none" width="100%" aria-hidden="true">${out}</svg>`;
+  }
+
+  R.receipt = d => `
+    <div class="rc-slip">
+      <div class="rc-c"><div class="rc-name">${esc(state.name)}</div><div>INVOICE #${esc(padNo(state.number))}</div><div>${fmtDate(state.date)}</div></div>
+      <div class="rc-dash"></div>
+      <div class="rc-row"><span>BILL TO</span><span style="text-align:right"><b>${esc(state.client)}</b><br>${lines(state.addr)}</span></div>
+      <div class="rc-row"><span>JOB</span><span>${esc(state.job)}</span></div>
+      <div class="rc-row"><span>TERMS</span><span>${esc(state.terms)}</span></div>
+      <div class="rc-row"><span>DUE</span><span>${fmtDate(state.due)}</span></div>
+      <div class="rc-dash"></div>
+      ${d.items.map(i => `<div class="rc-item"><div class="d">${esc(i.desc)}</div><div class="rc-row"><span>${i.hasH ? hrs(i.h) : "0"} h x ${i.hasR ? rateFmt(i.r) : "$0.00"}</span><span>${i.hasNums ? money2(i.line) : ""}</span></div></div>`).join("")}
+      <div class="rc-dash"></div>
+      <div class="rc-tot">
+        <div class="rc-row"><span>TOTAL HOURS</span><span>${hrs(d.totalHours)}</span></div>
+        <div class="rc-row"><span>TOTAL</span><span>${money2(d.total)}</span></div>
+        <div class="rc-row"><span>SALES TAX</span><span>${plain(d.tax)}</span></div>
+      </div>
+      <div class="rc-dash"></div>
+      <div class="rc-row rc-bal"><span>BALANCE DUE</span><span>${money2(d.balance)}</span></div>
+      <div class="rc-dash"></div>
+      ${barcode(state.number + "|" + d.balance)}
+      <div class="rc-c">${esc(padNo(state.number))}-${String(state.date).replace(/-/g, "")}</div>
+      <div class="rc-c rc-thx" style="margin-top:10px">*** ${esc(state.thanks)} ***</div>
+    </div>`;
+
+  R.brutal = d => `
+    <div class="br-head br-box">
+      <div class="l"><h1>Invoice</h1><div class="nm">${esc(state.name)}</div></div>
+      <div class="r"><span class="br-k">Invoice no.</span><b>#${esc(padNo(state.number))}</b><span class="br-k" style="margin-top:8px">Issued ${fmtDate(state.date)}</span></div>
+    </div>
+    <div class="br-grid">
+      <div class="br-box"><div class="br-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+      <div class="br-box"><div class="br-k">Due date</div><div class="v"><b style="font-size:13pt">${fmtDate(state.due)}</b><br>${esc(state.terms)}</div></div>
+      <div class="br-box"><div class="br-k">Job</div><div class="v">${esc(state.job)}</div></div>
+    </div>
+    <div class="br-table br-box"><table class="br-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table></div>
+    <div class="br-low">
+      <div><span class="br-thx">${esc(state.thanks)}</span></div>
+      <div class="br-sum br-box">
+        <div><span>Total hours</span><span class="mono">${hrs(d.totalHours)}</span></div>
+        <div><span>Total</span><span class="mono">${money2(d.total)}</span></div>
+        <div><span>Sales tax</span><span class="mono">${plain(d.tax)}</span></div>
+        <div><span class="br-k">Balance due</span><b>${money2(d.balance)}</b></div>
+      </div>
+    </div>`;
+
   function renderPaper(el, tpl, d) {
     el.className = "paper t-" + tpl;
     el.innerHTML = R[tpl](d);
@@ -1007,10 +1354,16 @@
 
   // ---------- template picker (live thumbnails) ----------
   function renderPicker() {
-    const box = $("tpls");
-    box.innerHTML = TEMPLATES.map(t =>
+    const count = c => TEMPLATES.filter(t => t.cat === c).length;
+    $("cats").innerHTML = [{ id: "all", name: "All" }, ...CATEGORIES].map(c =>
+      `<button type="button" class="chip" id="cat_${c.id}" data-cat="${c.id}" aria-pressed="${catFilter === c.id}">${c.name}<small>${c.id === "all" ? TEMPLATES.length : count(c.id)}</small></button>`).join("");
+    $("cats").querySelectorAll(".chip").forEach(b => b.onclick = () => { catFilter = b.dataset.cat; renderPicker(); });
+    const tile = t =>
       `<button type="button" class="tpl" role="radio" id="tpl_${t.id}" data-id="${t.id}" aria-checked="${state.template === t.id}">` +
-      `<span class="thumb"><div class="paper" data-thumb="${t.id}"></div></span><span class="nm">${t.name}</span><span class="ds">${t.desc}</span></button>`).join("");
+      `<span class="thumb"><div class="paper" data-thumb="${t.id}"></div></span><span class="nm">${t.name}</span><span class="ds">${t.desc}</span></button>`;
+    const box = $("tpls");
+    box.innerHTML = CATEGORIES.filter(c => catFilter === "all" || catFilter === c.id).map(c =>
+      `<div class="tgroup"><div class="tgroup-h">${c.name}</div><div class="tgroup-row">${TEMPLATES.filter(t => t.cat === c.id).map(tile).join("")}</div></div>`).join("");
     box.querySelectorAll(".tpl").forEach(b => b.onclick = () => {
       state.template = b.dataset.id;
       box.querySelectorAll(".tpl").forEach(x => x.setAttribute("aria-checked", String(x === b)));
