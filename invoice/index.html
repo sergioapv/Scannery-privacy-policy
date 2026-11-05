@@ -645,6 +645,19 @@
   .xd-kv span:nth-child(odd) { opacity: .65; }
   .xd-foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 8pt; opacity: .7; padding-top: 10px; border-top: 1px solid var(--xd-line); }
 
+  /* ---------- Contractor details inside every template ---------- */
+  .xn { display: grid; grid-template-columns: repeat(auto-fit, minmax(2.1in, 1fr)); gap: 0.12in 0.3in; margin-top: 0.26in; font-size: 0.86em; line-height: 1.45; }
+  .xn-b { margin-top: 3px; overflow-wrap: anywhere; }
+  .xn-k { font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: .65; }
+  .t-receipt .xn { grid-template-columns: 1fr; gap: 6px; margin-top: 8px; font-size: 1em; }
+  .t-mono .xn { margin-top: 10px; }
+  .t-ledger .xn .lg-k { color: var(--mute); }
+  .t-classic > .cl-x { top: 8.62in; right: auto; width: 4.4in; height: 1.34in; overflow: hidden; font-size: 7.5pt; line-height: 1.4; }
+  .cl-x .xn { margin-top: 0; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: 1em; }
+  .cl-x .lbl { font-size: 7.5pt; }
+  .cl-period { margin-top: 8px; line-height: 1.5; }
+  .cl-period:empty { display: none; }
+
   /* ---------- Contractor fields in the editor ---------- */
   .xsec summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .xsec summary::-webkit-details-marker { display: none; }
@@ -808,7 +821,7 @@
           <div><label class="lbl-ui" for="x_swift">SWIFT / BIC</label><input class="field" id="x_swift"></div>
         </div>
 
-        <label class="chk"><input type="checkbox" id="x_detailsPage"><span>Add these details as a second page on the other templates. The Contractor template always shows them on the invoice itself.</span></label>
+        <p class="hint">Filled-in details appear on the invoice in every template. If they don't all fit on one page, the extra details continue on a second page.</p>
       </details>
     </section>
 
@@ -854,6 +867,7 @@
           <div>
             <div class="client-name" data-f="client"></div>
             <div class="client-addr" data-f="addr"></div>
+            <div class="cl-period" data-f="periodwrap"></div>
           </div>
         </div>
       </div>
@@ -877,6 +891,7 @@
       </table>
 
       <div class="thanks" data-f="thanks"></div>
+      <div class="cl-x" data-f="xband" data-fit></div>
 </template>
 <div class="toast" id="toast" role="status"></div>
 
@@ -965,7 +980,6 @@
     clientTaxIdLabel: "", clientTaxId: "", clientVat: "",
     vatMention: "", officialRef: "",
     bankName: "", accountHolder: "", iban: "", swift: "",
-    detailsPage: true,
   };
 
   let state;
@@ -993,7 +1007,6 @@
    "bankName", "accountHolder", "iban", "swift"].forEach(k => { fields["x_" + k] = k; });
   function fillForm() {
     for (const [id, k] of Object.entries(fields)) $(id).value = state[k];
-    $("x_detailsPage").checked = state.detailsPage !== false;
     if (hasExtras()) $("xsec").open = true;
     renderItemsEditor();
   }
@@ -1008,7 +1021,6 @@
     });
   }
 
-  $("x_detailsPage").addEventListener("change", e => { state.detailsPage = e.target.checked; update(); });
   $("x_currency").addEventListener("change", e => { state.currency = e.target.value; update(); });
   $("x_dateFmt").addEventListener("change", e => { state.dateFmt = e.target.value; update(); });
   const setVat = t => { state.vatMention = t; $("x_vatMention").value = t; update(); };
@@ -1132,7 +1144,9 @@
     f("job", state.job);
     f("terms", state.terms);
     f("client", state.client);
-    f("addr", state.addr);
+    f("addr", state.addr + xcPlain());
+    root.querySelector('[data-f="periodwrap"]').innerHTML = period() ? `<div class="lbl">Service period</div>${period()}` : "";
+    root.querySelector('[data-f="xband"]').innerHTML = xBand("lbl");
     f("thanks", state.thanks);
     f("taxlabel", taxName());
     let html = "";
@@ -1153,15 +1167,17 @@
     <div class="sw-top"><span class="who">${esc(state.name)}</span><span class="tag">Invoice ${esc(padNo(state.number))}</span></div>
     <div class="sw-head"><h1>Invoice</h1><span class="num">№ ${esc(padNo(state.number))}</span></div>
     <div class="sw-grid">
-      <div class="to"><div class="sw-k">Billed to</div><div class="sw-v"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}</div></div>
+      <div class="to"><div class="sw-k">Billed to</div><div class="sw-v"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}${xc()}</div></div>
       <div><div class="sw-k">Issued</div><div class="sw-v">${fmtDate(state.date)}</div></div>
       <div><div class="sw-k">Due</div><div class="sw-v">${fmtDate(state.due)}</div></div>
       <div><div class="sw-k">Terms</div><div class="sw-v">${esc(state.terms)}</div></div>
-      <div class="job"><div class="sw-k">Job</div><div class="sw-v">${esc(state.job)}</div></div>
+      ${period() ? `<div><div class="sw-k">Service period</div><div class="sw-v">${period()}</div></div>` : ""}
+      <div class="job"${period() ? ' style="grid-column: span 2"' : ""}><div class="sw-k">Job</div><div class="sw-v">${esc(state.job)}</div></div>
     </div>
     <table class="sw-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
       ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n amt">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
     </tbody></table>
+    ${xBand("sw-k")}
     <div class="sw-foot">
       <div><div class="sw-k">Total hours</div><div class="sw-hours">${hrs(d.totalHours)}<small> h</small></div><div class="sw-thanks">${esc(state.thanks)}</div></div>
       <div class="sw-sum">
@@ -1175,12 +1191,13 @@
   R.ledger = d => `
     <aside class="lg-side">
       <div class="lg-name">${esc(state.name)}</div>
-      <div><div class="lg-k">Billed to</div><div class="lg-v"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}</div></div>
+      <div><div class="lg-k">Billed to</div><div class="lg-v"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}${xc()}</div></div>
       <div class="lg-pair">
         <div><div class="lg-k">Issued</div><div class="lg-v mono">${fmtDate(state.date)}</div></div>
         <div><div class="lg-k">Due</div><div class="lg-v mono">${fmtDate(state.due)}</div></div>
         <div><div class="lg-k">Terms</div><div class="lg-v">${esc(state.terms)}</div></div>
         <div><div class="lg-k">Invoice</div><div class="lg-v mono">${esc(padNo(state.number))}</div></div>
+        ${period() ? `<div style="grid-column: 1 / -1"><div class="lg-k">Service period</div><div class="lg-v mono">${period()}</div></div>` : ""}
       </div>
       <div class="lg-due"><div class="lg-k">Balance due</div><div class="amt">${money2(d.balance)}</div><div class="by">by ${fmtDate(state.due)}</div></div>
     </aside>
@@ -1197,18 +1214,20 @@
         <div><span>${esc(taxName())}</span><span class="mono">${plain(d.tax)}</span></div>
         <div class="bal"><span>Balance due</span><span class="mono">${money2(d.balance)}</span></div>
       </div>
+      ${xBand("lg-k")}
       <div class="lg-thanks">${esc(state.thanks)}</div>
     </section>`;
 
   R.minimal = d => `
     <div class="mn-top"><span>${esc(state.name)}</span><span><span class="mute">Invoice</span> ${esc(state.number)}</span></div>
     <div class="mn-meta">
-      <div><div class="mn-k">Billed to</div><div class="mn-to"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}</div></div>
+      <div><div class="mn-k">Billed to</div><div class="mn-to"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}${xc()}</div></div>
       <dl class="mn-dl">
         <dt>Date</dt><dd>${fmtDate(state.date)}</dd>
         <dt>Due</dt><dd>${fmtDate(state.due)}</dd>
         <dt>Terms</dt><dd>${esc(state.terms)}</dd>
         <dt>Job</dt><dd>${esc(state.job)}</dd>
+        ${period() ? `<dt>Period</dt><dd>${period()}</dd>` : ""}
       </dl>
     </div>
     <table class="mn-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
@@ -1220,6 +1239,7 @@
       <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
       <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
     </div>
+    ${xBand("mn-k")}
     <div class="mn-thanks">${esc(state.thanks)}</div>`;
 
   R.carbon = d => `
@@ -1228,10 +1248,10 @@
       <div class="cc-title"><span class="t">INVOICE</span><span class="no"><span>NO.</span>${esc(padNo(state.number))}</span></div>
     </div>
     <div class="cc-grid">
-      <div class="to"><div class="cc-l">Sold to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+      <div class="to"><div class="cc-l">Sold to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
       <div><div class="cc-l">Date</div><div class="v">${fmtDate(state.date)}</div></div>
       <div><div class="cc-l">Due date</div><div class="v">${fmtDate(state.due)}</div></div>
-      <div><div class="cc-l">Job</div><div class="v">${esc(state.job)}</div></div>
+      <div><div class="cc-l">Job</div><div class="v">${esc(state.job)}</div>${period() ? `<div class="cc-l" style="margin-top:6px">Service period</div><div class="v">${period()}</div>` : ""}</div>
       <div><div class="cc-l">Terms</div><div class="v">${esc(state.terms)}</div></div>
     </div>
     <table class="cc-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
@@ -1247,6 +1267,7 @@
         <div><span class="cc-l">Balance due</span><span>${money2(d.balance)}</span></div>
       </div>
     </div>
+    ${xBand("cc-l")}
     <div class="cc-cut"><span class="cc-l">Detach and return this part with your payment</span></div>
     <div class="cc-stub">
       <div><div class="cc-l">Pay to</div><div class="v">${esc(state.name)}</div></div>
@@ -1259,12 +1280,13 @@
     <div class="fm-lh"><div class="nm">${esc(state.name)}</div><div class="fm-rule"></div></div>
     <div class="fm-title"><h1>Invoice</h1><span class="no"><span class="fm-sc">No.</span> ${esc(state.number)}</span></div>
     <div class="fm-row">
-      <div><div class="fm-sc">Billed to</div><div class="fm-to" style="margin-top:6px"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}</div></div>
+      <div><div class="fm-sc">Billed to</div><div class="fm-to" style="margin-top:6px"><span class="strong">${esc(state.client)}</span><br>${lines(state.addr)}${xc()}</div></div>
       <dl class="fm-part">
         <dt class="fm-sc">Date of issue</dt><dd>${fmtLong(state.date)}</dd>
         <dt class="fm-sc">Payment due</dt><dd>${fmtLong(state.due)}</dd>
         <dt class="fm-sc">Terms</dt><dd>${esc(state.terms)}</dd>
         <dt class="fm-sc">Job</dt><dd>${esc(state.job)}</dd>
+        ${period() ? `<dt class="fm-sc">Service period</dt><dd>${period()}</dd>` : ""}
       </dl>
     </div>
     <table class="fm-items"><thead><tr><th class="fm-sc">Description</th><th class="fm-sc n">Hours</th><th class="fm-sc n">Rate</th><th class="fm-sc n">Amount</th></tr></thead><tbody>
@@ -1277,6 +1299,7 @@
       <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
     </div>
     <div class="fm-remit">Kindly remit payment by ${fmtLong(state.due)}.</div>
+    ${xBand("fm-sc")}
     <div class="fm-foot"><div class="fm-rule"></div><div class="thanks2">${esc(state.thanks)}</div></div>`;
 
   const rows = (d, amtClass) => d.items.map(i =>
@@ -1290,13 +1313,14 @@
       </div>
       <div class="bp-dim"><i class="bp-arrow l"></i><span>${fmtDate(state.date)} · ${esc(state.client)}</span><i class="bp-arrow r"></i></div>
       <div class="bp-info">
-        <div><div class="bp-l">Client</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
-        <div><div class="bp-l">Payment terms</div><div class="v">${esc(state.terms)}</div><div class="bp-l" style="margin-top:8px">Scope</div><div class="v">${esc(state.job)}</div></div>
+        <div><div class="bp-l">Client</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
+        <div><div class="bp-l">Payment terms</div><div class="v">${esc(state.terms)}</div><div class="bp-l" style="margin-top:8px">Scope</div><div class="v">${esc(state.job)}</div>${period() ? `<div class="bp-l" style="margin-top:8px">Service period</div><div class="v">${period()}</div>` : ""}</div>
       </div>
       <table class="bp-items"><thead><tr><th class="bp-l">Description</th><th class="bp-l n">Hours</th><th class="bp-l n">Rate</th><th class="bp-l n">Amount</th></tr></thead><tbody>
         ${rows(d)}
         ${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(d.pad)}
       </tbody></table>
+      ${xBand("bp-l")}
       <div class="bp-low">
         <div class="bp-notes">
           <div class="bp-l">Notes</div>
@@ -1317,8 +1341,8 @@
     <h1 class="ed-head"><em>Invoice</em> <span>no.&nbsp;${esc(state.number)}</span></h1>
     <p class="ed-deck">${esc(state.job)} for <b>${esc(state.client)}</b>, ${hrs(d.totalHours)} hours billed on ${esc(state.terms)} terms.</p>
     <div class="ed-cols">
-      <div><div class="ed-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
-      <div><div class="ed-k">Details</div><div class="v">Issued ${fmtDate(state.date)}<br>Due ${fmtDate(state.due)}<br>${esc(state.terms)} · ${esc(state.job)}</div></div>
+      <div><div class="ed-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
+      <div><div class="ed-k">Details</div><div class="v">Issued ${fmtDate(state.date)}<br>Due ${fmtDate(state.due)}<br>${period() ? `Period ${period()}<br>` : ""}${esc(state.terms)} · ${esc(state.job)}</div></div>
       <div><div class="ed-k">Amount due</div><div class="amt">${money2(d.balance)}</div></div>
     </div>
     <table class="ed-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d, "amt")}</tbody></table>
@@ -1328,19 +1352,21 @@
       <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
       <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
     </div>
+    ${xBand("ed-k")}
     <div class="ed-foot"><span class="thx">${esc(state.thanks)}</span><span class="pg">Invoice ${esc(state.number)} · Due ${fmtDate(state.due)}</span></div>`;
 
   R.bauhaus = d => `
     <div class="bh-top">
       <div class="bh-title"><h1>INVOICE</h1><div class="nm">${esc(state.name)}</div></div>
-      <div class="bh-art"><div class="sq"></div><div class="tri"></div><div class="ci"><span>No.</span><b>${esc(String(state.number).padStart(2, "0"))}</b></div></div>
+      <div class="bh-art"><div class="sq"></div><div class="tri"></div><div class="ci"><span>No.</span><b${String(state.number).length > 3 ? ` style="font-size:${Math.max(9, 31 - String(state.number).length * 3)}pt"` : ""}>${esc(String(state.number).padStart(2, "0"))}</b></div></div>
     </div>
     <div class="bh-info">
-      <div><div class="bh-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
-      <div><div class="bh-k">Dates</div><div class="v"><div class="row"><span>Issued</span><span>${fmtDate(state.date)}</span></div><div class="row"><span>Due</span><span>${fmtDate(state.due)}</span></div></div></div>
+      <div><div class="bh-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
+      <div><div class="bh-k">Dates</div><div class="v"><div class="row"><span>Issued</span><span>${fmtDate(state.date)}</span></div><div class="row"><span>Due</span><span>${fmtDate(state.due)}</span></div>${period() ? `<div class="row"><span>Period</span><span>${period()}</span></div>` : ""}</div></div>
       <div><div class="bh-k">Job</div><div class="v">${esc(state.job)}<div class="row" style="margin-top:4px"><span>Terms</span><span>${esc(state.terms)}</span></div></div></div>
     </div>
     <table class="bh-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d, "amt")}</tbody></table>
+    ${xBand("bh-k")}
     <div class="bh-low">
       <div class="bh-left">
         <div>
@@ -1361,8 +1387,9 @@
     <div class="mo-rule"></div>
     <dl class="mo-kv">
       <dt>from</dt><dd>${esc(state.name)}</dd>
-      <dt>to</dt><dd>${esc(state.client)}<br>${lines(state.addr)}</dd>
+      <dt>to</dt><dd>${esc(state.client)}<br>${lines(state.addr)}${xc()}</dd>
       <dt>job</dt><dd>${esc(state.job)}</dd>
+      ${period() ? `<dt>period</dt><dd>${period()}</dd>` : ""}
       <dt>terms</dt><dd>${esc(state.terms)}</dd>
       <dt>issued</dt><dd>${fmtDate(state.date)}</dd>
       <dt>due</dt><dd>${fmtDate(state.due)}</dd>
@@ -1375,6 +1402,7 @@
       <span></span><span>${esc(taxName().toLowerCase())}</span><span>${plain(d.tax)}</span>
       <span></span><span class="b">balance due</span><span class="b">${money2(d.balance)}</span>
     </div>
+    ${xBand("xn-k")}
     <div class="mo-rule eq"></div>
     <div class="mo-thx">// ${esc(state.thanks)}</div>
     <div class="mo-end"><span>${esc(state.name)}</span><span>EOF</span></div>`;
@@ -1388,8 +1416,8 @@
       <div class="ti-tile"><div class="k">Issued</div><div class="v">${fmtDate(state.date)}</div><div class="s">Due ${fmtDate(state.due)}</div></div>
     </div>
     <div class="ti-info">
-      <div><div class="k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
-      <div><div class="k">Details</div><div class="v"><div class="row"><span>Job</span><span>${esc(state.job)}</span></div><div class="row"><span>Terms</span><span>${esc(state.terms)}</span></div><div class="row"><span>Due date</span><span>${fmtDate(state.due)}</span></div></div></div>
+      <div><div class="k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
+      <div><div class="k">Details</div><div class="v"><div class="row"><span>Job</span><span>${esc(state.job)}</span></div><div class="row"><span>Terms</span><span>${esc(state.terms)}</span></div><div class="row"><span>Due date</span><span>${fmtDate(state.due)}</span></div>${period() ? `<div class="row"><span>Service period</span><span>${period()}</span></div>` : ""}</div></div>
     </div>
     <div class="ti-table"><table class="ti-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead>
       <tbody>${rows(d, "amt")}</tbody>
@@ -1398,6 +1426,7 @@
         <tr><td>${esc(taxName())}</td><td></td><td></td><td class="n">${plain(d.tax)}</td></tr>
         <tr><td><b>Balance due</b></td><td></td><td></td><td class="n"><b>${money2(d.balance)}</b></td></tr>
       </tfoot></table></div>
+    ${xBand("xn-k")}
     <div class="ti-foot"><span>${esc(state.thanks)}</span><span>Invoice <b>#${esc(padNo(state.number))}</b></span></div>`;
 
   R.monogram = d => `
@@ -1409,11 +1438,12 @@
     <div class="mg-title">Invoice</div>
     <div class="mg-sub">No. ${esc(state.number)} · ${fmtLong(state.date)}</div>
     <div class="mg-cols">
-      <div><div class="mg-sc">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
+      <div><div class="mg-sc">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
       <div><div class="mg-sc">Particulars</div><div class="v">
         <div class="mg-lead"><span>Job</span><i></i><span>${esc(state.job)}</span></div>
         <div class="mg-lead"><span>Terms</span><i></i><span>${esc(state.terms)}</span></div>
         <div class="mg-lead"><span>Due</span><i></i><span>${fmtLong(state.due)}</span></div>
+        ${period() ? `<div class="mg-lead"><span>Period</span><i></i><span>${period()}</span></div>` : ""}
       </div></div>
     </div>
     <table class="mg-items"><thead><tr><th class="mg-sc">Description</th><th class="mg-sc n">Hours</th><th class="mg-sc n">Rate</th><th class="mg-sc n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
@@ -1423,6 +1453,7 @@
       <div class="mg-lead"><span>${esc(taxName())}</span><i></i><span>${plain(d.tax)}</span></div>
       <div class="mg-lead bal"><span>Balance due</span><i></i><span>${money2(d.balance)}</span></div>
     </div>
+    ${xBand("mg-sc")}
     <div class="mg-foot">${esc(state.thanks)}</div>`;
 
   R.deco = d => `
@@ -1432,11 +1463,12 @@
       <div class="dc-title">INVOICE</div>
       <div class="dc-name">${esc(state.name)}</div>
       <div class="dc-info">
-        <div><div class="dc-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
-        <div><div class="dc-k">Invoice</div><div class="v">No. ${esc(padNo(state.number))}<br>Issued ${fmtDate(state.date)}<br>Due ${fmtDate(state.due)}</div></div>
+        <div><div class="dc-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
+        <div><div class="dc-k">Invoice</div><div class="v">No. ${esc(padNo(state.number))}<br>Issued ${fmtDate(state.date)}<br>Due ${fmtDate(state.due)}${period() ? `<br>Period ${period()}` : ""}</div></div>
         <div><div class="dc-k">Engagement</div><div class="v">${esc(state.job)}<br>${esc(state.terms)}</div></div>
       </div>
       <table class="dc-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
+      ${xBand("dc-k")}
       <div class="dc-low">
         <div class="dc-thx">${esc(state.thanks)}</div>
         <div class="dc-sum">
@@ -1465,10 +1497,11 @@
     <div class="rc-slip">
       <div class="rc-c"><div class="rc-name">${esc(state.name)}</div><div>INVOICE #${esc(padNo(state.number))}</div><div>${fmtDate(state.date)}</div></div>
       <div class="rc-dash"></div>
-      <div class="rc-row"><span>BILL TO</span><span style="text-align:right"><b>${esc(state.client)}</b><br>${lines(state.addr)}</span></div>
+      <div class="rc-row"><span>BILL TO</span><span style="text-align:right"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</span></div>
       <div class="rc-row"><span>JOB</span><span>${esc(state.job)}</span></div>
       <div class="rc-row"><span>TERMS</span><span>${esc(state.terms)}</span></div>
       <div class="rc-row"><span>DUE</span><span>${fmtDate(state.due)}</span></div>
+      ${period() ? `<div class="rc-row"><span>PERIOD</span><span>${period()}</span></div>` : ""}
       <div class="rc-dash"></div>
       ${d.items.map(i => `<div class="rc-item"><div class="d">${esc(i.desc)}</div><div class="rc-row"><span>${i.hasH ? hrs(i.h) : "0"} h x ${i.hasR ? rateFmt(i.r) : "$0.00"}</span><span>${i.hasNums ? money2(i.line) : ""}</span></div></div>`).join("")}
       <div class="rc-dash"></div>
@@ -1480,6 +1513,7 @@
       <div class="rc-dash"></div>
       <div class="rc-row rc-bal"><span>BALANCE DUE</span><span>${money2(d.balance)}</span></div>
       <div class="rc-dash"></div>
+      ${xBand("xn-k")}
       ${barcode(state.number + "|" + d.balance)}
       <div class="rc-c">${esc(padNo(state.number))}-${String(state.date).replace(/-/g, "")}</div>
       <div class="rc-c rc-thx" style="margin-top:10px">*** ${esc(state.thanks)} ***</div>
@@ -1491,11 +1525,12 @@
       <div class="r"><span class="br-k">Invoice no.</span><b>#${esc(padNo(state.number))}</b><span class="br-k" style="margin-top:8px">Issued ${fmtDate(state.date)}</span></div>
     </div>
     <div class="br-grid">
-      <div class="br-box"><div class="br-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}</div></div>
-      <div class="br-box"><div class="br-k">Due date</div><div class="v"><b style="font-size:13pt">${fmtDate(state.due)}</b><br>${esc(state.terms)}</div></div>
+      <div class="br-box"><div class="br-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
+      <div class="br-box"><div class="br-k">Due date</div><div class="v"><b style="font-size:13pt">${fmtDate(state.due)}</b><br>${esc(state.terms)}${period() ? `<br>Period ${period()}` : ""}</div></div>
       <div class="br-box"><div class="br-k">Job</div><div class="v">${esc(state.job)}</div></div>
     </div>
     <div class="br-table br-box"><table class="br-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table></div>
+    ${xBand("br-k")}
     <div class="br-low">
       <div><span class="br-thx">${esc(state.thanks)}</span></div>
       <div class="br-sum br-box">
@@ -1532,6 +1567,32 @@
     const a = [filled(state.bankName) ? `Bank: ${esc(state.bankName)}` : "", filled(state.accountHolder) ? `Account holder: ${esc(state.accountHolder)}` : ""].filter(Boolean).join(" – ");
     const b = [filled(state.iban) ? `IBAN / Account no.: ${esc(state.iban)}` : "", filled(state.swift) ? `SWIFT/BIC: ${esc(state.swift)}` : ""].filter(Boolean).join(" – ");
     return [a, b].filter(Boolean).join("<br>");
+  };
+  // XM = how much of the details band moved to page 2: 0 none, 1 VAT/reference/payment, 2 also "From"
+  let XM = 0;
+  const xcList = () => [filled(state.clientTaxId) ? `${filled(state.clientTaxIdLabel) ? state.clientTaxIdLabel : "Tax ID"}: ${state.clientTaxId}` : "",
+                        filled(state.clientVat) ? `VAT number: ${state.clientVat}` : ""].filter(Boolean);
+  const xc = () => xcList().map(l => "<br>" + esc(l)).join("");
+  const xcPlain = () => xcList().map(l => "\n" + l).join("");
+  const fromLines = () => [
+    filled(state.legalName) && state.legalName.trim() !== String(state.name).trim() ? `<b>${esc(state.legalName)}</b>` : "",
+    filled(state.legalForm) ? esc(state.legalForm) : "",
+    filled(state.fromAddr) ? lines(state.fromAddr) : "",
+    filled(state.taxId) ? `Tax ID${filled(state.taxIdLabel) ? " (" + esc(state.taxIdLabel) + ")" : ""}: ${esc(state.taxId)}` : "",
+    filled(state.vatNo) ? `VAT number: ${esc(state.vatNo)}` : "",
+    filled(state.regNo) ? `Business registration no.: ${esc(state.regNo)}` : "",
+    [state.email, state.phone].filter(filled).map(esc).join(" – "),
+  ].filter(Boolean).join("<br>");
+  const payText = () => { const b = bankLines(); return b ? `Bank transfer by ${fmtDate(state.due)}<br>${b}` : ""; };
+  const xItems = (from, rest) => [
+    from && fromLines() ? ["From", fromLines()] : null,
+    rest && filled(state.vatMention) ? ["VAT mention", lines(state.vatMention)] : null,
+    rest && filled(state.officialRef) ? ["Official invoice reference", esc(state.officialRef)] : null,
+    rest && payText() ? ["Payment", payText()] : null,
+  ].filter(Boolean);
+  const xBand = lbl => {
+    const it = xItems(XM < 2, XM < 1);
+    return it.length ? `<div class="xn">${it.map(([t, b]) => `<div class="xn-i"><div class="${lbl}">${t}</div><div class="xn-b">${b}</div></div>`).join("")}</div>` : "";
   };
   const qtyText = i => i.hasH ? hrs(i.h) + (filled(state.unit) ? " " + esc(state.unit) : "") : "";
 
@@ -1596,19 +1657,12 @@
   function detailsPage(tpl) {
     const [font, head, ink, accent, line] = XD_THEME[tpl] || XD_THEME.minimal;
     const style = `--xd-font:${font};--xd-head:${head || font};--xd-ink:${ink};--xd-accent:${accent};--xd-line:${line}`;
-    const sec = (title, body, wide) => body ? `<section class="xd-sec${wide ? " wide" : ""}"><h3>${title}</h3><p>${body}</p></section>` : "";
-    const kv = [["Invoice no.", esc(state.number)], ["Issue date", fmtDate(state.date)], ["Service period", period()],
-                ["Payment due", fmtDate(state.due)], ["Terms", esc(state.terms)], ["Job", esc(state.job)]].filter(r => r[1]);
-    const bank = bankLines();
+    const wide = t => t === "VAT mention" || t === "Official invoice reference";
+    const secs = xItems(XM >= 2, XM >= 1);
     return { style, html: `
-      <div class="xd-top"><span class="nm">${esc(state.legalName || state.name)}</span><span class="r">Invoice ${esc(state.number)}<br>Additional details</span></div>
+      <div class="xd-top"><span class="nm">${esc(state.legalName || state.name)}</span><span class="r">Invoice ${esc(state.number)}<br>Details, continued</span></div>
       <div class="xd-grid">
-        ${sec("Service provider", providerLines())}
-        ${sec("Bill to", clientLines())}
-        <section class="xd-sec"><h3>Invoice</h3><div class="xd-kv">${kv.map(r => `<span>${r[0]}</span><span>${r[1]}</span>`).join("")}</div></section>
-        ${sec("Payment", bank ? `Payment by bank transfer by ${fmtDate(state.due)}.<br>${bank}` : "")}
-        ${sec("VAT mention", filled(state.vatMention) ? lines(state.vatMention) : "", true)}
-        ${sec("Local official invoice reference", filled(state.officialRef) ? esc(state.officialRef) : "", true)}
+        ${secs.map(([t, b]) => `<section class="xd-sec${wide(t) ? " wide" : ""}"><h3>${t}</h3><p>${b}</p></section>`).join("")}
       </div>
       <div class="xd-foot"><span>${esc(state.thanks)}</span><span>Page 2 of 2</span></div>` };
   }
@@ -1640,8 +1694,10 @@
     thumbs();
   }
   function thumbs() {
-    const d = invoiceData();
+    const d = invoiceData(), keep = XM;
+    XM = 0;
     document.querySelectorAll("[data-thumb]").forEach(el => renderPaper(el, el.dataset.thumb, d));
+    XM = keep;
   }
   let thumbTimer;
 
@@ -1657,21 +1713,36 @@
   }
   new ResizeObserver(fit).observe($("sheetArea"));
 
+  // Does any text on the page run past the bottom margin, off the top, or out of a fixed-size slot?
+  function overflows(el) {
+    const r = el.getBoundingClientRect();
+    const s = r.width / 816, limit = r.bottom - 0.15 * 96 * s;
+    for (const e of el.querySelectorAll("[data-fit]")) if (e.scrollHeight > e.clientHeight + 1) return true;
+    for (const e of el.querySelectorAll("*")) {
+      if (e.childElementCount && !(e.tagName === "TD" || e.tagName === "DD" || e.tagName === "P")) continue;
+      if (!e.textContent.trim()) continue;
+      const q = e.getBoundingClientRect();
+      if (q.bottom > limit + 1 || q.top < r.top - 1) return true;
+    }
+    return false;
+  }
+
   // ---------- preview ----------
   function update() {
     const tpl = R[state.template] ? state.template : "classic";
     const d = invoiceData();
-    renderPaper($("paper"), tpl, d);
+    XM = 0;
+    const pg = $("paper");
+    renderPaper(pg, tpl, d);
     const p2el = $("paper2");
-    let want2 = tpl !== "contractor" && state.detailsPage !== false && hasExtras();
-    if (want2) { const x = detailsPage(tpl); p2el.className = "paper xd"; p2el.setAttribute("style", x.style); p2el.innerHTML = x.html; }
-    else p2el.innerHTML = "";
+    let want2 = false;
+    p2el.innerHTML = "";
+    if (tpl !== "contractor" && hasExtras()) {
+      while (XM < 2 && overflows(pg)) { XM++; renderPaper(pg, tpl, d); }
+      if (XM > 0) { const x = detailsPage(tpl); p2el.className = "paper xd"; p2el.setAttribute("style", x.style); p2el.innerHTML = x.html; want2 = true; }
+    }
     if (tpl === "contractor") {
-      const pg = $("paper");
-      const wasHidden = p2el.hidden; p2el.hidden = false;           // measure with the layout settled
-      const overflows = pg.scrollHeight > pg.clientHeight + 1;
-      p2el.hidden = wasHidden;
-      if (overflows) {
+      if (pg.scrollHeight > pg.clientHeight + 1) {
         pg.innerHTML = R.contractor(d, "main");
         p2el.className = "paper t-contractor"; p2el.removeAttribute("style"); p2el.innerHTML = R.contractor(d, "rest");
         want2 = true;
