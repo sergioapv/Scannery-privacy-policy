@@ -6,7 +6,7 @@
 <title>Invoice Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Work+Sans:wght@300;400;500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Archivo+Narrow:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Poiret+One&family=Josefin+Sans:wght@300;400;600;700&family=Space+Mono:wght@400;700&family=Archivo+Black&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Work+Sans:wght@300;400;500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Archivo+Narrow:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Poiret+One&family=Josefin+Sans:wght@300;400;600;700&family=Space+Mono:wght@400;700&family=Archivo+Black&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
 <style>
   /* Century Gothic when installed, otherwise TeX Gyre Adventor (free look-alike with a real bold) */
   @font-face { font-family: "InvoiceGothic"; font-weight: 400; src: local("Century Gothic"), local("CenturyGothic"), url("fonts/texgyreadventor-regular.otf") format("opentype"); }
@@ -107,7 +107,9 @@
 
   .sheet-area { flex: 1; padding: 28px 20px 48px; display: flex; justify-content: center; }
   .sheet { position: relative; flex: 0 0 auto; }
-  .sheet > .paper { position: absolute; left: 0; top: 0; margin: 0; transform-origin: 0 0; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(23, 24, 28, .14); }
+  .sheet > .pages { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  .pages > .paper { margin: 0 0 24px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 32px rgba(23, 24, 28, .14); }
+  .pages > .paper[hidden] { display: none; }
 
   .toast { position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 8px); background: var(--ui-ink); color: #fff; padding: 9px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 10; }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -606,13 +608,65 @@
   .tgroup-h { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ui-mute); margin: 0 0 6px; height: 14px; }
   .tgroup-row { display: flex; gap: 12px; }
 
+  /* ---------- Contractor (EU-style service invoice) ---------- */
+  .t-contractor { --ink: #22211f; --mute: #6f6c66; --line: #dcd8cf; --head: #f3f1ec;
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 9.5pt; line-height: 1.4;
+    padding: 0.45in 0.75in 0.45in; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+  .ct-run { display: flex; justify-content: space-between; font-size: 7pt; color: var(--mute); text-transform: uppercase; letter-spacing: 0.06em; }
+  .ct-title { margin: 0.2in 0 0.12in; font-family: "Source Serif 4", Georgia, serif; font-weight: 400; font-size: 25pt; letter-spacing: 0.01em; line-height: 1; }
+  .ct-tbl { border-collapse: collapse; }
+  .ct-tbl th, .ct-tbl td { border: 1px solid var(--line); padding: 4px 9px; text-align: left; vertical-align: top; }
+  .ct-tbl th { background: var(--head); font-weight: 400; color: var(--mute); }
+  .ct-info td:first-child { background: var(--head); width: 1.45in; }
+  .ct-h { font-weight: 600; margin: 0.14in 0 2px; }
+  .ct-h span { font-weight: 400; color: var(--mute); }
+  .ct-p { margin: 0; }
+  .ct-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35in; }
+  .ct-items { width: 100%; margin-top: 0.18in; }
+  .ct-items .n { text-align: right; white-space: nowrap; }
+  .ct-items th.n { text-align: left; }
+  .ct-sum { margin-top: 0.14in; min-width: 3.4in; }
+  .ct-sum td:last-child { text-align: right; min-width: 1.3in; }
+  .ct-sum tr.b td { font-weight: 600; }
+  .ct-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; padding-top: 0.12in; font-size: 7pt; color: var(--mute); }
+  .ct-foot .thx { font-family: "Source Serif 4", Georgia, serif; font-style: italic; font-size: 11pt; color: var(--ink); text-transform: none; }
+
+  /* ---------- Additional details page (page 2 for the other templates) ---------- */
+  .xd { --xd-font: system-ui, sans-serif; --xd-head: var(--xd-font); --xd-ink: #1b1b1b; --xd-accent: #1b1b1b; --xd-line: #d9d9d9;
+    font-family: var(--xd-font); color: var(--xd-ink); font-size: 10pt; line-height: 1.5; padding: 0.75in 0.8in 0.6in; display: flex; flex-direction: column; }
+  .xd-top { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 10px; border-bottom: 2px solid var(--xd-accent); }
+  .xd-top .nm { font-family: var(--xd-head); font-size: 17pt; color: var(--xd-accent); line-height: 1.1; }
+  .xd-top .r { font-size: 9pt; color: var(--xd-accent); text-align: right; }
+  .xd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.28in 0.4in; margin-top: 0.32in; }
+  .xd-sec.wide { grid-column: 1 / -1; }
+  .xd-sec h3 { margin: 0 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--xd-line); font-family: var(--xd-head); font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--xd-accent); }
+  .xd-sec p { margin: 0; }
+  .xd-kv { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; }
+  .xd-kv span:nth-child(odd) { opacity: .65; }
+  .xd-foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 8pt; opacity: .7; padding-top: 10px; border-top: 1px solid var(--xd-line); }
+
+  /* ---------- Contractor fields in the editor ---------- */
+  .xsec summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .xsec summary::-webkit-details-marker { display: none; }
+  .xsec summary h2 { margin: 0; }
+  .xsec summary .tog { font-size: 12px; color: var(--ui-mute); white-space: nowrap; }
+  .xsec summary .tog::after { content: " ▾"; }
+  .xsec[open] summary .tog::after { content: " ▴"; }
+  .xsec .sub { margin: 16px 0 8px; font-size: 12.5px; font-weight: 600; }
+  .xsec .sub:first-of-type { margin-top: 12px; }
+  .chk { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; margin-top: 14px; }
+  .chk input { margin-top: 3px; accent-color: var(--ui-accent); }
+  select.field { padding-right: 6px; }
+
   @page { size: letter; margin: 0; }
   @media print {
     html, body { height: auto; background: #fff; }
     .bar, .editor, .strip, .toast { display: none !important; }
     .app, .stage, .sheet-area { display: block; height: auto; padding: 0; overflow: visible; }
     .sheet { width: auto !important; height: auto !important; }
-    .sheet > .paper { position: relative; transform: none !important; box-shadow: none; margin: 0; }
+    .sheet > .pages { position: static; transform: none !important; }
+    .pages > .paper { box-shadow: none; margin: 0; }
+    .pages > .paper + .paper { break-before: page; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
@@ -669,7 +723,7 @@
         </div>
         <div class="grid g2" style="margin-top:10px">
           <div><label class="lbl-ui" for="g_prefix">Row description</label><input class="field" id="g_prefix"></div>
-          <div><label class="lbl-ui" for="g_rate">Default rate ($/h)</label><input class="field num" type="number" id="g_rate" step="0.01" placeholder="50.00"></div>
+          <div><label class="lbl-ui" for="g_rate">Default rate</label><input class="field num" type="number" id="g_rate" step="0.01" placeholder="50.00"></div>
         </div>
         <p class="hint">Adds one row per Monday–Friday week, like "Development work 09/21-09/25" at 40 hours. Edit the hours for weeks with days off.</p>
       </div>
@@ -679,11 +733,83 @@
     <section class="sec">
       <h2>Totals &amp; footer</h2>
       <div class="grid g2">
-        <div><label class="lbl-ui" for="f_tax">Sales tax (%)</label><input class="field num" type="number" id="f_tax" step="0.01"></div>
+        <div><label class="lbl-ui" for="f_tax" id="taxPctLbl">Sales tax (%)</label><input class="field num" type="number" id="f_tax" step="0.01"></div>
         <div><label class="lbl-ui" for="f_minRows">Table rows</label><input class="field num" type="number" id="f_minRows" min="0" max="11"></div>
       </div>
       <p class="hint">Table rows pads the table with empty lines in Original, Carbon Copy and Blueprint. Up to 11 line items fit on the page.</p>
       <div style="margin-top:12px"><label class="lbl-ui" for="f_thanks">Footer message</label><input class="field" id="f_thanks"></div>
+    </section>
+
+    <section class="sec">
+      <details class="xsec" id="xsec">
+        <summary><h2>Contractor &amp; international details</h2><span class="tog" id="xsecTog">Optional</span></summary>
+        <p class="hint">For clients that need tax IDs, VAT wording and bank details on the invoice. Leave these blank and your invoices stay exactly as they are.</p>
+
+        <div class="sub">Format</div>
+        <div class="grid g2">
+          <div><label class="lbl-ui" for="x_currency">Currency</label>
+            <select class="field" id="x_currency">
+              <option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option>
+              <option value="BRL">BRL (R$)</option><option value="CAD">CAD (CA$)</option><option value="AUD">AUD (A$)</option>
+              <option value="CHF">CHF</option><option value="ARS">ARS (AR$)</option><option value="MXN">MXN (MX$)</option>
+            </select></div>
+          <div><label class="lbl-ui" for="x_dateFmt">Date format</label>
+            <select class="field" id="x_dateFmt"><option value="us">MM/DD/YYYY</option><option value="eu">DD/MM/YYYY</option><option value="iso">YYYY-MM-DD</option></select></div>
+          <div><label class="lbl-ui" for="x_taxLabel">Tax name</label><input class="field" id="x_taxLabel" list="taxList"></div>
+          <div><label class="lbl-ui" for="x_unit">Quantity unit</label><input class="field" id="x_unit" placeholder="hours, package…"></div>
+        </div>
+        <datalist id="taxList"><option>Sales tax</option><option>VAT</option><option>GST</option><option>IVA</option><option>TVA</option></datalist>
+
+        <div class="sub">Service period</div>
+        <div class="grid g2">
+          <div><label class="lbl-ui" for="x_periodStart">From</label><input class="field" type="date" id="x_periodStart"></div>
+          <div><label class="lbl-ui" for="x_periodEnd">To</label><input class="field" type="date" id="x_periodEnd"></div>
+        </div>
+
+        <div class="sub">Your business (service provider)</div>
+        <div class="grid">
+          <div><label class="lbl-ui" for="x_legalName">Registered business or full legal name</label><input class="field" id="x_legalName" placeholder="Defaults to your name"></div>
+          <div><label class="lbl-ui" for="x_legalForm">Legal form</label><input class="field" id="x_legalForm" placeholder="e.g. SASU, LTDA, autónomo, monotributista"></div>
+          <div><label class="lbl-ui" for="x_fromAddr">Address</label><textarea class="field" id="x_fromAddr" placeholder="Street&#10;Postcode, City, Country"></textarea></div>
+          <div class="grid g2">
+            <div><label class="lbl-ui" for="x_taxIdLabel">Tax ID type</label><input class="field" id="x_taxIdLabel" list="taxIdList" placeholder="NIF, CNPJ…"></div>
+            <div><label class="lbl-ui" for="x_taxId">Tax ID number</label><input class="field" id="x_taxId"></div>
+            <div><label class="lbl-ui" for="x_vatNo">VAT number</label><input class="field" id="x_vatNo" placeholder="If applicable"></div>
+            <div><label class="lbl-ui" for="x_regNo">Business registration no.</label><input class="field" id="x_regNo" placeholder="If applicable"></div>
+            <div><label class="lbl-ui" for="x_email">Email</label><input class="field" type="email" id="x_email"></div>
+            <div><label class="lbl-ui" for="x_phone">Phone</label><input class="field" type="tel" id="x_phone"></div>
+          </div>
+        </div>
+        <datalist id="taxIdList"><option>NIF</option><option>CNPJ</option><option>CPF</option><option>CUIT</option><option>SIREN</option><option>NCC</option><option>EIN</option><option>SSN</option></datalist>
+
+        <div class="sub">Client tax details</div>
+        <div class="grid g2">
+          <div><label class="lbl-ui" for="x_clientTaxIdLabel">Tax ID type</label><input class="field" id="x_clientTaxIdLabel" list="taxIdList" placeholder="SIREN…"></div>
+          <div><label class="lbl-ui" for="x_clientTaxId">Tax ID number</label><input class="field" id="x_clientTaxId"></div>
+          <div style="grid-column:1/-1"><label class="lbl-ui" for="x_clientVat">Client VAT number</label><input class="field" id="x_clientVat"></div>
+        </div>
+
+        <div class="sub">VAT mention</div>
+        <textarea class="field" id="x_vatMention" placeholder="Wording required for your situation"></textarea>
+        <div class="row-btns">
+          <button class="btn small" type="button" id="vatEU">EU reverse charge</button>
+          <button class="btn small" type="button" id="vatExport">Export of services</button>
+        </div>
+
+        <div class="sub">Local official invoice reference</div>
+        <input class="field" id="x_officialRef" placeholder="e.g. NFS-e number and authorization code">
+        <p class="hint">Where your country requires an official electronic invoice (Factura E, NFS-e, FNE…), put its number and code here and attach it.</p>
+
+        <div class="sub">Payment by bank transfer</div>
+        <div class="grid g2">
+          <div><label class="lbl-ui" for="x_bankName">Bank</label><input class="field" id="x_bankName"></div>
+          <div><label class="lbl-ui" for="x_accountHolder">Account holder</label><input class="field" id="x_accountHolder"></div>
+          <div><label class="lbl-ui" for="x_iban">IBAN / account no.</label><input class="field" id="x_iban"></div>
+          <div><label class="lbl-ui" for="x_swift">SWIFT / BIC</label><input class="field" id="x_swift"></div>
+        </div>
+
+        <label class="chk"><input type="checkbox" id="x_detailsPage"><span>Add these details as a second page on the other templates. The Contractor template always shows them on the invoice itself.</span></label>
+      </details>
     </section>
 
     <section class="sec">
@@ -705,7 +831,7 @@
       <div class="tpls" id="tpls" role="radiogroup" aria-label="Invoice template"></div>
     </div>
     <div class="sheet-area" id="sheetArea">
-      <div class="sheet" id="sheet"><div class="paper t-classic" id="paper"></div></div>
+      <div class="sheet" id="sheet"><div class="pages" id="pages"><div class="paper t-classic" id="paper"></div><div class="paper xd" id="paper2" hidden></div></div></div>
     </div>
   </main>
 </div>
@@ -746,7 +872,7 @@
 
       <table class="sum">
         <tr><td class="k lbl">Total</td><td class="v" data-f="total"></td></tr>
-        <tr><td class="k lbl">Sales Tax</td><td class="v" data-f="tax"></td></tr>
+        <tr><td class="k lbl" data-f="taxlabel"></td><td class="v" data-f="tax"></td></tr>
         <tr><td class="k lbl">Balance<br>Due:</td><td class="v" data-f="balance"></td></tr>
       </table>
 
@@ -762,16 +888,27 @@
   const today = () => toISO(new Date());
   function toISO(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   function parseISO(s) { if (!s) return null; const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
-  function fmtDate(s) { const d = parseISO(s); if (!d) return ""; return String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getDate()).padStart(2, "0") + "/" + d.getFullYear(); }
-  function fmtShort(s) { const f = fmtDate(s); return f ? f.slice(0, 6) + f.slice(8) : ""; }
-  function mmdd(d) { return String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getDate()).padStart(2, "0"); }
+  const p2 = n => String(n).padStart(2, "0");
+  const dfmt = () => (typeof state !== "undefined" && state.dateFmt) || "us";
+  function fmtDate(s) {
+    const d = parseISO(s); if (!d) return "";
+    const f = dfmt();
+    if (f === "eu") return p2(d.getDate()) + "/" + p2(d.getMonth() + 1) + "/" + d.getFullYear();
+    if (f === "iso") return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate());
+    return p2(d.getMonth() + 1) + "/" + p2(d.getDate()) + "/" + d.getFullYear();
+  }
+  function fmtShort(s) { const f = fmtDate(s); return f && dfmt() !== "iso" ? f.slice(0, 6) + f.slice(8) : f; }
+  function mmdd(d) { return dfmt() === "eu" ? p2(d.getDate()) + "/" + p2(d.getMonth() + 1) : p2(d.getMonth() + 1) + "/" + p2(d.getDate()); }
+  const CUR = { USD: "$", EUR: "€", GBP: "£", BRL: "R$", CAD: "CA$", AUD: "A$", CHF: "CHF ", ARS: "AR$", MXN: "MX$" };
+  const sym = () => { const c = (typeof state !== "undefined" && state.currency) || "USD"; return CUR[c] ?? c + " "; };
+  const taxName = () => (typeof state !== "undefined" && String(state.taxLabel || "").trim()) || "Sales tax";
   function num(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
-  const money = n => "$" + (Number.isInteger(Math.round(n * 100) / 100) ? String(Math.round(n)) : n.toFixed(2));
-  const rateFmt = n => "$" + n.toFixed(2);
+  const money = n => sym() + (Number.isInteger(Math.round(n * 100) / 100) ? String(Math.round(n)) : n.toFixed(2));
+  const rateFmt = n => sym() + n.toFixed(2);
   const plain = n => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const hrs = n => (Math.round(n * 100) / 100).toString();
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const money2 = n => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const money2 = n => sym() + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtLong = s => { const d = parseISO(s); return d ? d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : ""; };
   const padNo = n => /^\d+$/.test(String(n).trim()) ? String(n).trim().padStart(4, "0") : String(n);
   const lines = s => esc(s).replace(/\n/g, "<br>");
@@ -786,6 +923,7 @@
   ];
   const TEMPLATES = [
     { id: "classic",   cat: "yours",   name: "Original",    desc: "Your template" },
+    { id: "contractor", cat: "yours",  name: "Contractor",  desc: "Tax IDs and VAT" },
     { id: "swiss",     cat: "modern",  name: "Swiss",       desc: "Big type" },
     { id: "ledger",    cat: "modern",  name: "Ledger",      desc: "Dark sidebar" },
     { id: "tiles",     cat: "modern",  name: "Tiles",       desc: "Dashboard cards" },
@@ -820,6 +958,14 @@
     rate: "",
     hoursPerDay: 8,
     template: "classic",
+    // contractor / international (all optional; blank keeps the invoice as before)
+    currency: "USD", dateFmt: "us", taxLabel: "Sales tax", unit: "",
+    periodStart: "", periodEnd: "",
+    legalName: "", legalForm: "", fromAddr: "", taxIdLabel: "", taxId: "", vatNo: "", regNo: "", email: "", phone: "",
+    clientTaxIdLabel: "", clientTaxId: "", clientVat: "",
+    vatMention: "", officialRef: "",
+    bankName: "", accountHolder: "", iban: "", swift: "",
+    detailsPage: true,
   };
 
   let state;
@@ -842,8 +988,13 @@
   const fields = { f_name: "name", f_date: "date", f_number: "number", f_terms: "terms", f_due: "due", f_job: "job",
                    f_client: "client", f_addr: "addr", f_tax: "tax", f_minRows: "minRows", f_thanks: "thanks",
                    g_prefix: "prefix", g_rate: "rate", g_hours: "hoursPerDay" };
+  ["currency", "dateFmt", "taxLabel", "unit", "periodStart", "periodEnd", "legalName", "legalForm", "fromAddr", "taxIdLabel", "taxId",
+   "vatNo", "regNo", "email", "phone", "clientTaxIdLabel", "clientTaxId", "clientVat", "vatMention", "officialRef",
+   "bankName", "accountHolder", "iban", "swift"].forEach(k => { fields["x_" + k] = k; });
   function fillForm() {
     for (const [id, k] of Object.entries(fields)) $(id).value = state[k];
+    $("x_detailsPage").checked = state.detailsPage !== false;
+    if (hasExtras()) $("xsec").open = true;
     renderItemsEditor();
   }
   for (const [id, k] of Object.entries(fields)) {
@@ -856,6 +1007,13 @@
       update();
     });
   }
+
+  $("x_detailsPage").addEventListener("change", e => { state.detailsPage = e.target.checked; update(); });
+  $("x_currency").addEventListener("change", e => { state.currency = e.target.value; update(); });
+  $("x_dateFmt").addEventListener("change", e => { state.dateFmt = e.target.value; update(); });
+  const setVat = t => { state.vatMention = t; $("x_vatMention").value = t; update(); };
+  $("vatEU").onclick = () => setVat("Reverse charge – VAT due by the recipient, Article 196 of Directive 2006/112/EC");
+  $("vatExport").onclick = () => setVat("Export of services – VAT not applicable in [country]");
 
   // ---------- line items editor ----------
   function renderItemsEditor() {
@@ -976,6 +1134,7 @@
     f("client", state.client);
     f("addr", state.addr);
     f("thanks", state.thanks);
+    f("taxlabel", taxName());
     let html = "";
     for (const i of d.items) {
       html += `<tr><td>${esc(i.desc)}</td><td class="c">${i.hasH ? esc(hrs(i.h)) : ""}</td>` +
@@ -1007,7 +1166,7 @@
       <div><div class="sw-k">Total hours</div><div class="sw-hours">${hrs(d.totalHours)}<small> h</small></div><div class="sw-thanks">${esc(state.thanks)}</div></div>
       <div class="sw-sum">
         <div><span>Total</span><span>${money2(d.total)}</span></div>
-        <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+        <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
         <div class="bal"><span class="sw-k">Balance due</span><b>${money2(d.balance)}</b></div>
         <div class="due">Due ${fmtDate(state.due)}</div>
       </div>
@@ -1035,7 +1194,7 @@
       <div class="lg-sum">
         <div><span>Total hours</span><span class="mono">${hrs(d.totalHours)}</span></div>
         <div><span>Total</span><span class="mono">${money2(d.total)}</span></div>
-        <div><span>Sales tax</span><span class="mono">${plain(d.tax)}</span></div>
+        <div><span>${esc(taxName())}</span><span class="mono">${plain(d.tax)}</span></div>
         <div class="bal"><span>Balance due</span><span class="mono">${money2(d.balance)}</span></div>
       </div>
       <div class="lg-thanks">${esc(state.thanks)}</div>
@@ -1058,7 +1217,7 @@
     <div class="mn-sum">
       <div><span>Hours</span><span>${hrs(d.totalHours)}</span></div>
       <div><span>Total</span><span>${money2(d.total)}</span></div>
-      <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+      <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
       <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
     </div>
     <div class="mn-thanks">${esc(state.thanks)}</div>`;
@@ -1084,7 +1243,7 @@
       <div class="cc-stamp">${esc(state.thanks)}</div>
       <div class="cc-sum">
         <div><span class="cc-l">Total</span><span>${money2(d.total)}</span></div>
-        <div><span class="cc-l">Sales tax</span><span>${plain(d.tax)}</span></div>
+        <div><span class="cc-l">${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
         <div><span class="cc-l">Balance due</span><span>${money2(d.balance)}</span></div>
       </div>
     </div>
@@ -1114,7 +1273,7 @@
     </tbody></table>
     <div class="fm-sum">
       <div><span>Total</span><span>${money2(d.total)}</span></div>
-      <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+      <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
       <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
     </div>
     <div class="fm-remit">Kindly remit payment by ${fmtLong(state.due)}.</div>
@@ -1141,7 +1300,7 @@
       <div class="bp-low">
         <div class="bp-notes">
           <div class="bp-l">Notes</div>
-          <ol><li>Total ${money2(d.total)} · sales tax ${plain(d.tax)}.</li><li>Payment due ${fmtDate(state.due)} (${esc(state.terms)}).</li><li>${esc(state.thanks)}</li></ol>
+          <ol><li>Total ${money2(d.total)} · ${esc(taxName().toLowerCase())} ${plain(d.tax)}.</li><li>Payment due ${fmtDate(state.due)} (${esc(state.terms)}).</li><li>${esc(state.thanks)}</li></ol>
         </div>
         <div class="bp-tb">
           <div class="k bp-l">Prepared by</div><div>${esc(state.name)}</div>
@@ -1166,7 +1325,7 @@
     <div class="ed-sum">
       <div><span>Total hours</span><span>${hrs(d.totalHours)}</span></div>
       <div><span>Total</span><span>${money2(d.total)}</span></div>
-      <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+      <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
       <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
     </div>
     <div class="ed-foot"><span class="thx">${esc(state.thanks)}</span><span class="pg">Invoice ${esc(state.number)} · Due ${fmtDate(state.due)}</span></div>`;
@@ -1187,7 +1346,7 @@
         <div>
           <div class="row"><span>Total hours</span><span>${hrs(d.totalHours)}</span></div>
           <div class="row"><span>Total</span><span>${money2(d.total)}</span></div>
-          <div class="row"><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+          <div class="row"><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
         </div>
         <div class="thx">${esc(state.thanks)}</div>
       </div>
@@ -1213,7 +1372,7 @@
     <div class="mo-rule"></div>
     <div class="mo-sum">
       <span>${hrs(d.totalHours)} h</span><span>total</span><span>${money2(d.total)}</span>
-      <span></span><span>sales tax</span><span>${plain(d.tax)}</span>
+      <span></span><span>${esc(taxName().toLowerCase())}</span><span>${plain(d.tax)}</span>
       <span></span><span class="b">balance due</span><span class="b">${money2(d.balance)}</span>
     </div>
     <div class="mo-rule eq"></div>
@@ -1236,7 +1395,7 @@
       <tbody>${rows(d, "amt")}</tbody>
       <tfoot>
         <tr><td>Total</td><td class="n">${hrs(d.totalHours)}</td><td></td><td class="n">${money2(d.total)}</td></tr>
-        <tr><td>Sales tax</td><td></td><td></td><td class="n">${plain(d.tax)}</td></tr>
+        <tr><td>${esc(taxName())}</td><td></td><td></td><td class="n">${plain(d.tax)}</td></tr>
         <tr><td><b>Balance due</b></td><td></td><td></td><td class="n"><b>${money2(d.balance)}</b></td></tr>
       </tfoot></table></div>
     <div class="ti-foot"><span>${esc(state.thanks)}</span><span>Invoice <b>#${esc(padNo(state.number))}</b></span></div>`;
@@ -1261,7 +1420,7 @@
     <div class="mg-sum">
       <div class="mg-lead"><span>Total hours</span><i></i><span>${hrs(d.totalHours)}</span></div>
       <div class="mg-lead"><span>Total</span><i></i><span>${money2(d.total)}</span></div>
-      <div class="mg-lead"><span>Sales tax</span><i></i><span>${plain(d.tax)}</span></div>
+      <div class="mg-lead"><span>${esc(taxName())}</span><i></i><span>${plain(d.tax)}</span></div>
       <div class="mg-lead bal"><span>Balance due</span><i></i><span>${money2(d.balance)}</span></div>
     </div>
     <div class="mg-foot">${esc(state.thanks)}</div>`;
@@ -1283,7 +1442,7 @@
         <div class="dc-sum">
           <div><span>Total hours</span><span>${hrs(d.totalHours)}</span></div>
           <div><span>Total</span><span>${money2(d.total)}</span></div>
-          <div><span>Sales tax</span><span>${plain(d.tax)}</span></div>
+          <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
           <div class="bal"><span class="dc-k" style="margin:0;color:inherit">Balance due</span><b>${money2(d.balance)}</b></div>
         </div>
       </div>
@@ -1316,7 +1475,7 @@
       <div class="rc-tot">
         <div class="rc-row"><span>TOTAL HOURS</span><span>${hrs(d.totalHours)}</span></div>
         <div class="rc-row"><span>TOTAL</span><span>${money2(d.total)}</span></div>
-        <div class="rc-row"><span>SALES TAX</span><span>${plain(d.tax)}</span></div>
+        <div class="rc-row"><span>${esc(taxName().toUpperCase())}</span><span>${plain(d.tax)}</span></div>
       </div>
       <div class="rc-dash"></div>
       <div class="rc-row rc-bal"><span>BALANCE DUE</span><span>${money2(d.balance)}</span></div>
@@ -1342,10 +1501,117 @@
       <div class="br-sum br-box">
         <div><span>Total hours</span><span class="mono">${hrs(d.totalHours)}</span></div>
         <div><span>Total</span><span class="mono">${money2(d.total)}</span></div>
-        <div><span>Sales tax</span><span class="mono">${plain(d.tax)}</span></div>
+        <div><span>${esc(taxName())}</span><span class="mono">${plain(d.tax)}</span></div>
         <div><span class="br-k">Balance due</span><b>${money2(d.balance)}</b></div>
       </div>
     </div>`;
+
+  // ---------- contractor / international details ----------
+  const EXTRA_KEYS = ["legalName", "legalForm", "fromAddr", "taxId", "vatNo", "regNo", "email", "phone",
+    "clientTaxId", "clientVat", "periodStart", "periodEnd", "vatMention", "officialRef", "bankName", "accountHolder", "iban", "swift"];
+  const hasExtras = () => EXTRA_KEYS.some(k => String(state[k] || "").trim() !== "");
+  const filled = v => String(v || "").trim() !== "";
+  const period = () => filled(state.periodStart) || filled(state.periodEnd) ? `${fmtDate(state.periodStart)} to ${fmtDate(state.periodEnd)}` : "";
+  const exclTax = () => /vat|iva|tva|gst|btw|mwst|igv/i.test(taxName()) ? " excl. " + taxName() : "";
+  const providerLines = () => [
+    `<b>${esc(state.legalName || state.name)}</b>`,
+    filled(state.legalForm) ? esc(state.legalForm) : "",
+    filled(state.fromAddr) ? lines(state.fromAddr) : "",
+    filled(state.taxId) ? `Tax ID${filled(state.taxIdLabel) ? " (" + esc(state.taxIdLabel) + ")" : ""}: ${esc(state.taxId)}` : "",
+    filled(state.vatNo) ? `VAT number: ${esc(state.vatNo)}` : "",
+    filled(state.regNo) ? `Business registration no.: ${esc(state.regNo)}` : "",
+    [state.email, state.phone].filter(filled).map(esc).join(" – "),
+  ].filter(Boolean).join("<br>");
+  const clientLines = () => [
+    `<b>${esc(state.client)}</b>`,
+    filled(state.addr) ? lines(state.addr) : "",
+    filled(state.clientTaxId) ? `${filled(state.clientTaxIdLabel) ? esc(state.clientTaxIdLabel) : "Tax ID"}: ${esc(state.clientTaxId)}` : "",
+    filled(state.clientVat) ? `VAT number: ${esc(state.clientVat)}` : "",
+  ].filter(Boolean).join("<br>");
+  const bankLines = () => {
+    const a = [filled(state.bankName) ? `Bank: ${esc(state.bankName)}` : "", filled(state.accountHolder) ? `Account holder: ${esc(state.accountHolder)}` : ""].filter(Boolean).join(" – ");
+    const b = [filled(state.iban) ? `IBAN / Account no.: ${esc(state.iban)}` : "", filled(state.swift) ? `SWIFT/BIC: ${esc(state.swift)}` : ""].filter(Boolean).join(" – ");
+    return [a, b].filter(Boolean).join("<br>");
+  };
+  const qtyText = i => i.hasH ? hrs(i.h) + (filled(state.unit) ? " " + esc(state.unit) : "") : "";
+
+  // part: undefined = whole invoice on one page; "main" / "rest" = split over two pages when it does not fit
+  R.contractor = (d, part) => {
+    const bank = bankLines();
+    const foot = pg => `<div class="ct-foot"><span class="thx">${pg === 1 && part === "main" ? "" : esc(state.thanks)}</span><span>Invoice ${esc(state.number)} · Total hours ${hrs(d.totalHours)}${part ? ` · Page ${pg} of 2` : ""}</span></div>`;
+    const run = `<div class="ct-run"><span>Invoice</span><span>${esc(state.legalName || state.name)}</span></div>`;
+    const rest = `
+    ${filled(state.vatMention) ? `<div class="ct-h">VAT mention</div><p class="ct-p">${lines(state.vatMention)}</p>` : ""}
+    ${filled(state.officialRef) ? `<div class="ct-h">Local official invoice reference</div><p class="ct-p">${esc(state.officialRef)}</p>` : ""}
+    <div class="ct-h">Payment terms</div>
+    <p class="ct-p">${bank ? `Payment by bank transfer by ${fmtDate(state.due)}.<br>${bank}` : `Payment due by ${fmtDate(state.due)}${filled(state.terms) ? " (" + esc(state.terms) + ")" : ""}.`}</p>`;
+    if (part === "rest") return run + `<div style="height:0.2in"></div>` + rest + foot(2);
+    return `
+    ${run}
+    <h1 class="ct-title">INVOICE</h1>
+    <table class="ct-tbl ct-info">
+      <tr><td>Invoice no.</td><td>${esc(state.number)}</td></tr>
+      <tr><td>Issue date</td><td>${fmtDate(state.date)}</td></tr>
+      ${period() ? `<tr><td>Service period</td><td>${period()}</td></tr>` : ""}
+      <tr><td>Payment due date</td><td>${fmtDate(state.due)}</td></tr>
+      ${filled(state.job) ? `<tr><td>Job</td><td>${esc(state.job)}</td></tr>` : ""}
+      ${filled(state.terms) ? `<tr><td>Payment terms</td><td>${esc(state.terms)}</td></tr>` : ""}
+    </table>
+    <div class="ct-parties">
+      <div><div class="ct-h">From <span>(service provider)</span></div><p class="ct-p">${providerLines()}</p></div>
+      <div><div class="ct-h">Bill to</div><p class="ct-p">${clientLines()}</p></div>
+    </div>
+    <table class="ct-tbl ct-items">
+      <tr><th>Description of services</th><th class="n">Quantity</th><th class="n">Unit price${exclTax()}</th><th class="n">Amount${exclTax()}</th></tr>
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${qtyText(i)}</td><td class="n">${i.hasR ? money2(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+    </table>
+    <table class="ct-tbl ct-sum">
+      <tr><th></th><th>Amount (${esc(state.currency || "USD")})</th></tr>
+      <tr><td>Subtotal${exclTax()}</td><td>${money2(d.total)}</td></tr>
+      <tr><td>${esc(taxName())} ${hrs(num(state.tax))} %</td><td>${money2(d.tax)}</td></tr>
+      <tr class="b"><td>Total due</td><td>${money2(d.balance)}</td></tr>
+    </table>
+    ${part === "main" ? "" : rest}
+    ${foot(1)}`;
+  };
+
+  // Second page for the other templates, styled with each template's own fonts and colours
+  const XD_THEME = {
+    classic:   ["InvoiceGothic, 'Century Gothic', sans-serif", "", "#1d3451", "#5e5b96", "#83b29b"],
+    swiss:     ["'Schibsted Grotesk', sans-serif", "", "#111214", "#e4412b", "#e3e3e6"],
+    ledger:    ["Geist, sans-serif", "", "#172024", "#1c2a2f", "#e5e9ea"],
+    tiles:     ["Manrope, sans-serif", "", "#101828", "#0e7c66", "#e4e7ec"],
+    minimal:   ["'Work Sans', sans-serif", "", "#1b1b1b", "#1b1b1b", "#e8e8e8"],
+    mono:      ["'JetBrains Mono', monospace", "", "#1c1c1c", "#1c1c1c", "#cfcfca"],
+    formal:    ["'EB Garamond', serif", "", "#23262c", "#1e2945", "#d8dbe1"],
+    editorial: ["'Instrument Sans', sans-serif", "'Instrument Serif', serif", "#1a1a17", "#24473a", "#dddad3"],
+    monogram:  ["'Cormorant Garamond', serif", "", "#2a2326", "#6b2335", "#b39463"],
+    carbon:    ["'Courier Prime', monospace", "'Archivo Narrow', sans-serif", "#2b2723", "#a3302a", "#e3b5b0"],
+    blueprint: ["'IBM Plex Mono', monospace", "'IBM Plex Sans Condensed', sans-serif", "#10233f", "#1d4f91", "#b5c6de"],
+    deco:      ["'Josefin Sans', sans-serif", "'Poiret One', sans-serif", "#141414", "#a9812f", "#d9c08a"],
+    receipt:   ["'Space Mono', monospace", "", "#222222", "#222222", "#cccccc"],
+    bauhaus:   ["Archivo, sans-serif", "", "#151515", "#1f4fa0", "#d9d9d9"],
+    brutal:    ["Archivo, sans-serif", "'Archivo Black', sans-serif", "#111111", "#111111", "#111111"],
+  };
+  function detailsPage(tpl) {
+    const [font, head, ink, accent, line] = XD_THEME[tpl] || XD_THEME.minimal;
+    const style = `--xd-font:${font};--xd-head:${head || font};--xd-ink:${ink};--xd-accent:${accent};--xd-line:${line}`;
+    const sec = (title, body, wide) => body ? `<section class="xd-sec${wide ? " wide" : ""}"><h3>${title}</h3><p>${body}</p></section>` : "";
+    const kv = [["Invoice no.", esc(state.number)], ["Issue date", fmtDate(state.date)], ["Service period", period()],
+                ["Payment due", fmtDate(state.due)], ["Terms", esc(state.terms)], ["Job", esc(state.job)]].filter(r => r[1]);
+    const bank = bankLines();
+    return { style, html: `
+      <div class="xd-top"><span class="nm">${esc(state.legalName || state.name)}</span><span class="r">Invoice ${esc(state.number)}<br>Additional details</span></div>
+      <div class="xd-grid">
+        ${sec("Service provider", providerLines())}
+        ${sec("Bill to", clientLines())}
+        <section class="xd-sec"><h3>Invoice</h3><div class="xd-kv">${kv.map(r => `<span>${r[0]}</span><span>${r[1]}</span>`).join("")}</div></section>
+        ${sec("Payment", bank ? `Payment by bank transfer by ${fmtDate(state.due)}.<br>${bank}` : "")}
+        ${sec("VAT mention", filled(state.vatMention) ? lines(state.vatMention) : "", true)}
+        ${sec("Local official invoice reference", filled(state.officialRef) ? esc(state.officialRef) : "", true)}
+      </div>
+      <div class="xd-foot"><span>${esc(state.thanks)}</span><span>Page 2 of 2</span></div>` };
+  }
 
   function renderPaper(el, tpl, d) {
     el.className = "paper t-" + tpl;
@@ -1384,9 +1650,10 @@
     const area = $("sheetArea");
     const avail = area.clientWidth - 40;
     const s = Math.min(1, Math.max(0.3, avail / 816));
+    const pages = $("paper2").hidden ? 1 : 2;
     $("sheet").style.width = 816 * s + "px";
-    $("sheet").style.height = 1056 * s + "px";
-    $("paper").style.transform = s === 1 ? "none" : `scale(${s})`;
+    $("sheet").style.height = (1056 * pages + 24 * (pages - 1)) * s + "px";
+    $("pages").style.transform = s === 1 ? "none" : `scale(${s})`;
   }
   new ResizeObserver(fit).observe($("sheetArea"));
 
@@ -1395,6 +1662,24 @@
     const tpl = R[state.template] ? state.template : "classic";
     const d = invoiceData();
     renderPaper($("paper"), tpl, d);
+    const p2el = $("paper2");
+    let want2 = tpl !== "contractor" && state.detailsPage !== false && hasExtras();
+    if (want2) { const x = detailsPage(tpl); p2el.className = "paper xd"; p2el.setAttribute("style", x.style); p2el.innerHTML = x.html; }
+    else p2el.innerHTML = "";
+    if (tpl === "contractor") {
+      const pg = $("paper");
+      const wasHidden = p2el.hidden; p2el.hidden = false;           // measure with the layout settled
+      const overflows = pg.scrollHeight > pg.clientHeight + 1;
+      p2el.hidden = wasHidden;
+      if (overflows) {
+        pg.innerHTML = R.contractor(d, "main");
+        p2el.className = "paper t-contractor"; p2el.removeAttribute("style"); p2el.innerHTML = R.contractor(d, "rest");
+        want2 = true;
+      }
+    }
+    if (p2el.hidden === want2) { p2el.hidden = !want2; fit(); }
+    $("xsecTog").textContent = hasExtras() ? "In use" : "Optional";
+    $("taxPctLbl").textContent = taxName() + " (%)";
 
     // header status
     const cur = TEMPLATES.find(t => t.id === tpl);
@@ -1410,7 +1695,7 @@
     $("itemCount").textContent = d.items.length ? `${d.items.length} row${d.items.length === 1 ? "" : "s"} · ${hrs(d.totalHours)} h` : "";
     $("totals").innerHTML = d.items.length ?
       `<div><span>Total</span><span>${money2(d.total)}</span></div>` +
-      `<div><span>Sales tax</span><span>${plain(d.tax)}</span></div>` +
+      `<div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>` +
       `<div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>` : "";
 
     clearTimeout(thumbTimer);
