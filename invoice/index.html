@@ -1675,7 +1675,7 @@
     const it = xItems(XM < 2, XM < 1);
     return it.length ? `<div class="xn">${it.map(([t, b]) => `<div class="xn-i"><div class="${lbl}">${t}</div><div class="xn-b">${b}</div></div>`).join("")}</div>` : "";
   };
-  const qtyText = i => i.hasH ? qtyWord(i.h, i.u) : "";
+  const qtyText = i => i.hasH ? hrs(i.h) : "";
 
   // part: undefined = whole invoice on one page; "main" / "rest" = split over two pages when it does not fit
   R.contractor = (d, part) => {
