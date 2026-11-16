@@ -74,10 +74,17 @@
   .hint { font-size: 12px; color: var(--ui-mute); margin: 6px 0 0; line-height: 1.45; }
 
   .items { display: flex; flex-direction: column; gap: 8px; }
-  .item { border: 1px solid var(--ui-line); border-radius: 10px; padding: 8px; display: grid; grid-template-columns: 72px 88px 1fr 28px; gap: 6px; align-items: center; background: #fff; }
+  .item { border: 1px solid var(--ui-line); border-radius: 10px; padding: 8px; display: grid; grid-template-columns: 64px 84px minmax(0, 1fr) 28px; gap: 6px; align-items: center; background: #fff; }
+  .item select.field { padding: 0 4px; font-size: 13px; }
+  .item .rate { position: relative; }
+  .item .rate .field { padding-right: 38px; }
+  .item .rate span { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font-size: 11.5px; color: var(--ui-mute); pointer-events: none; }
+  .item .amt { grid-column: 1 / -1; display: flex; justify-content: space-between; font-size: 12.5px; }
+  .item .amt small { display: inline; }
+  .items-head { display: grid; grid-template-columns: 64px 84px minmax(0, 1fr) 28px; gap: 6px; padding: 0 9px 4px; font-size: 11.5px; color: var(--ui-mute); }
   .item .desc { grid-column: 1 / -1; }
-  .item .amt { font-family: var(--ui-mono); font-size: 13px; text-align: right; color: var(--ui-ink); padding-right: 2px; }
-  .item .amt small { display: block; font-family: var(--ui-font); font-size: 11px; color: var(--ui-mute); }
+  .item .amt b { font-family: var(--ui-mono); font-weight: 500; color: var(--ui-ink); }
+  .item .amt small { font-family: var(--ui-font); font-size: 11.5px; color: var(--ui-mute); }
   .item .x { width: 28px; height: 28px; border: 0; background: none; border-radius: 6px; cursor: pointer; color: var(--ui-mute); font-size: 18px; line-height: 1; }
   .item .x:hover { background: #fbeceb; color: #b42318; }
   .items-empty { border: 1px dashed #cfd2d9; border-radius: 10px; padding: 16px; text-align: center; color: var(--ui-mute); font-size: 13px; }
@@ -758,10 +765,10 @@
         </div>
         <div class="quick">
           <div class="grid qgrid">
-            <div><label class="lbl-ui" for="g_month">Fill a month by week</label><input class="field" type="month" id="g_month"></div>
-            <button class="btn" id="genBtn">Fill weeks</button>
+            <div><label class="lbl-ui" for="g_month">Fill a month</label><input class="field" type="month" id="g_month"></div>
+            <button class="btn" id="genBtn">Fill</button>
           </div>
-          <p class="hint">Adds one row per Monday–Friday week, like "Development work 09/21-09/25" at 40 hours. Hours per day, row text and rate come from <a href="#" class="go-settings" data-sec="sec_defaults">Settings › Defaults</a>.</p>
+          <p class="hint"><span id="genHint"></span> Unit, rate and row text come from <a href="#" class="go-settings" data-sec="sec_defaults">Settings › Defaults</a>.</p>
         </div>
         <div class="totals" id="totals"></div>
       </section>
@@ -834,12 +841,13 @@
       <section class="sec" id="sec_defaults">
         <h2>Defaults for new rows</h2>
         <div class="grid g2">
-          <div><label class="lbl-ui" for="g_rate">Hourly rate</label><input class="field num" type="number" id="g_rate" step="0.01" placeholder="50.00"></div>
-          <div><label class="lbl-ui" for="g_hours">Hours per day</label><input class="field num" type="number" id="g_hours" step="0.25"></div>
+          <div><label class="lbl-ui" for="g_unit">Bill by</label>
+            <select class="field" id="g_unit"><option value="hour">Hour</option><option value="day">Day</option><option value="week">Week</option><option value="month">Month</option></select></div>
+          <div><label class="lbl-ui" for="g_rate" id="rateLbl">Rate per hour</label><input class="field num" type="number" id="g_rate" step="0.01" placeholder="50.00"></div>
           <div><label class="lbl-ui" for="g_prefix">Row description</label><input class="field" id="g_prefix"></div>
-          <div><label class="lbl-ui" for="x_unit">Quantity unit <span class="opt">optional</span></label><input class="field" id="x_unit" placeholder="hours, package…"></div>
+          <div id="hoursPerDayBox"><label class="lbl-ui" for="g_hours">Hours per day</label><input class="field num" type="number" id="g_hours" step="0.25"></div>
         </div>
-        <p class="hint">Used by "+ Add row" and "Fill weeks". Quantity unit appears next to quantities in the Contractor template.</p>
+        <p class="hint">Used by "+ Add row" and "Fill". Each row can still use its own unit: hour, day, week or month.</p>
       </section>
 
       <section class="sec" id="sec_layout">
@@ -907,7 +915,7 @@
         <tr><td data-f="job"></td><td data-f="terms"></td><td data-f="due2"></td></tr>
       </table>
 
-      <div class="hdr lines-hdr"><div class="lbl">Description</div><div class="lbl"># Hours</div><div class="lbl">Rate</div><div class="lbl">Line Total</div></div>
+      <div class="hdr lines-hdr"><div class="lbl">Description</div><div class="lbl" data-f="qhead"># Hours</div><div class="lbl">Rate</div><div class="lbl">Line Total</div></div>
       <table class="inv lines">
         <colgroup><col class="c1"><col><col><col></colgroup>
         <tbody data-f="lines"></tbody>
@@ -943,6 +951,14 @@
   }
   function fmtShort(s) { const f = fmtDate(s); return f && dfmt() !== "iso" ? f.slice(0, 6) + f.slice(8) : f; }
   function mmdd(d) { return dfmt() === "eu" ? p2(d.getDate()) + "/" + p2(d.getMonth() + 1) : p2(d.getMonth() + 1) + "/" + p2(d.getDate()); }
+  // Billing units. Rows saved before units existed are hourly.
+  const UNITS = {
+    hour:  { one: "hour",  many: "hours",  per: "/h" },
+    day:   { one: "day",   many: "days",   per: "/day" },
+    week:  { one: "week",  many: "weeks",  per: "/wk" },
+    month: { one: "month", many: "months", per: "/mo" },
+  };
+  const unitOf = it => UNITS[it && it.unit] ? it.unit : "hour";
   const CUR = { USD: "$", EUR: "€", GBP: "£", BRL: "R$", CAD: "CA$", AUD: "A$", CHF: "CHF ", ARS: "AR$", MXN: "MX$" };
   const sym = () => { const c = (typeof state !== "undefined" && state.currency) || "USD"; return CUR[c] ?? c + " "; };
   const taxName = () => (typeof state !== "undefined" && String(state.taxLabel || "").trim()) || "Sales tax";
@@ -1001,6 +1017,7 @@
     prefix: "Development work",
     rate: "",
     hoursPerDay: 8,
+    billUnit: "hour",
     template: "classic",
     // contractor / international (all optional; blank keeps the invoice as before)
     currency: "USD", dateFmt: "us", taxLabel: "Sales tax", unit: "",
@@ -1030,8 +1047,8 @@
   // ---------- simple fields ----------
   const fields = { f_name: "name", f_date: "date", f_number: "number", f_terms: "terms", f_due: "due", f_job: "job",
                    f_client: "client", f_addr: "addr", f_tax: "tax", f_minRows: "minRows", f_thanks: "thanks",
-                   g_prefix: "prefix", g_rate: "rate", g_hours: "hoursPerDay" };
-  ["currency", "dateFmt", "taxLabel", "unit", "periodStart", "periodEnd", "legalName", "legalForm", "fromAddr", "taxIdLabel", "taxId",
+                   g_prefix: "prefix", g_rate: "rate", g_hours: "hoursPerDay", g_unit: "billUnit" };
+  ["currency", "dateFmt", "taxLabel", "periodStart", "periodEnd", "legalName", "legalForm", "fromAddr", "taxIdLabel", "taxId",
    "vatNo", "regNo", "email", "phone", "clientTaxIdLabel", "clientTaxId", "clientVat", "vatMention", "officialRef",
    "bankName", "accountHolder", "iban", "swift"].forEach(k => { fields["x_" + k] = k; });
   function fillForm() {
@@ -1049,6 +1066,7 @@
     });
   }
 
+  $("g_unit").addEventListener("change", e => { state.billUnit = e.target.value; update(); });
   $("x_currency").addEventListener("change", e => { state.currency = e.target.value; update(); });
   $("x_dateFmt").addEventListener("change", e => { state.dateFmt = e.target.value; update(); });
   const setVat = t => { state.vatMention = t; $("x_vatMention").value = t; update(); };
@@ -1080,23 +1098,26 @@
       body.innerHTML = `<div class="items-empty">No line items yet. Add a row, or fill a whole month below.</div>`;
       return;
     }
+    body.insertAdjacentHTML("beforeend", `<div class="items-head" aria-hidden="true"><span>Qty</span><span>Unit</span><span>Rate</span></div>`);
     state.items.forEach((it, i) => {
+      const u = unitOf(it);
       const row = document.createElement("div");
       row.className = "item";
       row.innerHTML =
         `<input class="field desc" id="it_desc_${i}" data-k="desc" aria-label="Description, row ${i + 1}" value="${esc(it.desc)}">` +
-        `<input class="field num" id="it_hours_${i}" data-k="hours" type="number" step="0.25" aria-label="Hours, row ${i + 1}" placeholder="hrs" value="${esc(it.hours)}">` +
-        `<input class="field num" id="it_rate_${i}" data-k="rate" type="number" step="0.01" aria-label="Rate, row ${i + 1}" placeholder="rate" value="${esc(it.rate)}">` +
-        `<div class="amt" data-amt="${i}"></div>` +
-        `<button class="x" title="Remove row" aria-label="Remove row ${i + 1}">&times;</button>`;
-      // amount sits under the inputs on the right; order: desc / hours rate amt x
+        `<input class="field num" id="it_hours_${i}" data-k="hours" type="number" step="0.25" aria-label="Quantity, row ${i + 1}" placeholder="qty" value="${esc(it.hours)}">` +
+        `<select class="field" id="it_unit_${i}" data-k="unit" aria-label="Unit, row ${i + 1}">${Object.keys(UNITS).map(k => `<option value="${k}"${k === u ? " selected" : ""}>${UNITS[k].many}</option>`).join("")}</select>` +
+        `<div class="rate"><input class="field num" id="it_rate_${i}" data-k="rate" type="number" step="0.01" aria-label="Rate per ${UNITS[u].one}, row ${i + 1}" placeholder="rate" value="${esc(it.rate)}"><span>${UNITS[u].per}</span></div>` +
+        `<button class="x" title="Remove row" aria-label="Remove row ${i + 1}">&times;</button>` +
+        `<div class="amt" data-amt="${i}"></div>`;
       row.querySelectorAll("input").forEach(inp => inp.addEventListener("input", () => { it[inp.dataset.k] = inp.value; update(); }));
+      row.querySelector("select").addEventListener("change", e => { it.unit = e.target.value; renderItemsEditor(); update(); });
       row.querySelector(".x").addEventListener("click", () => { state.items.splice(i, 1); renderItemsEditor(); update(); });
       body.appendChild(row);
     });
   }
   $("addRowBtn").onclick = () => {
-    state.items.push({ desc: state.prefix + " ", hours: "", rate: state.rate });
+    state.items.push({ desc: state.prefix + " ", hours: unitOf({ unit: state.billUnit }) === "hour" ? "" : "1", unit: unitOf({ unit: state.billUnit }), rate: state.rate });
     renderItemsEditor(); update();
     const el = $("it_desc_" + (state.items.length - 1)); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
   };
@@ -1116,15 +1137,16 @@
       if (!week) { week = { start: new Date(d), end: new Date(d), days: 0 }; weeks.push(week); }
       week.end = new Date(d); week.days++;
     }
-    const items = weeks.map(w => ({
-      desc: state.prefix + " " + (w.days === 1 ? mmdd(w.start) : mmdd(w.start) + "-" + mmdd(w.end)),
-      hours: hrs(w.days * perDay),
-      rate: state.rate,
-    }));
+    const unit = unitOf({ unit: state.billUnit });
+    const span = w => w.days === 1 ? mmdd(w.start) : mmdd(w.start) + "-" + mmdd(w.end);
+    const qty = { hour: w => w.days * perDay, day: w => w.days, week: w => w.days / 5 }[unit];
+    const items = unit === "month"
+      ? [{ desc: state.prefix + " " + new Date(y, m - 1, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" }), hours: "1", unit, rate: state.rate }]
+      : weeks.map(w => ({ desc: state.prefix + " " + span(w), hours: hrs(qty(w)), unit, rate: state.rate }));
     if (state.items.length && !confirm("Replace the current line items?")) return;
     state.items = items;
     renderItemsEditor(); update();
-    toast(items.length + " weeks added. Edit the hours for any days off.");
+    toast(unit === "month" ? "Added one row for the month." : items.length + " weeks added. Edit the quantity for any days off.");
   };
 
   // ---------- new / print / backup ----------
@@ -1163,19 +1185,32 @@
   // ---------- data shared by every template ----------
   function invoiceData() {
     let totalHours = 0, total = 0;
+    const qtyBy = {};
     const items = state.items.map(it => {
       const h = num(it.hours), r = num(it.rate);
       const hasH = String(it.hours).trim() !== "", hasR = String(it.rate).trim() !== "";
       const line = Math.round(h * r * 100) / 100;
-      totalHours += h; total += line;
-      return { desc: it.desc, h, r, line, hasH, hasR, hasNums: hasH || hasR };
+      const u = unitOf(it);
+      if (u === "hour") totalHours += h;
+      qtyBy[u] = (qtyBy[u] || 0) + h;
+      total += line;
+      return { desc: it.desc, h, r, u, line, hasH, hasR, hasNums: hasH || hasR };
     });
     const tax = Math.round(total * num(state.tax)) / 100;
-    return { items, totalHours, total, tax, balance: total + tax, pad: Math.max(0, num(state.minRows) - items.length) };
+    const allHours = items.every(i => i.u === "hour");
+    return { items, totalHours, total, tax, balance: total + tax, pad: Math.max(0, num(state.minRows) - items.length), allHours, qtyBy };
   }
 
   // ---------- templates ----------
   const R = {};
+
+  // When every row is hourly the templates print exactly what they always did.
+  const qtyWord = (n, u) => hrs(n) + " " + (n === 1 ? UNITS[u].one : UNITS[u].many);
+  const qc = (d, i) => !i.hasH ? "" : d.allHours ? hrs(i.h) : qtyWord(i.h, i.u);
+  const rc = (d, i, f) => !i.hasR ? "" : (f || rateFmt)(i.r) + (d.allHours ? "" : UNITS[i.u].per);
+  const tq = d => d.allHours ? hrs(d.totalHours) : Object.keys(UNITS).filter(u => d.qtyBy[u]).map(u => qtyWord(d.qtyBy[u], u)).join(" + ") || "0";
+  const qHead = (d, label) => d.allHours ? label : label === label.toUpperCase() ? "QTY" : label === label.toLowerCase() ? "qty" : "Qty";
+  const tqLabel = (d, label) => d.allHours ? label : label.replace(/hours/, "time").replace(/Hours/, "Time").replace(/HOURS/, "TIME");
 
   R.classic = d => {
     const root = document.createElement("div");
@@ -1193,14 +1228,15 @@
     root.querySelector('[data-f="periodwrap"]').innerHTML = period() ? `<div class="lbl">Service period</div>${period()}` : "";
     root.querySelector('[data-f="xband"]').innerHTML = xBand("lbl");
     f("thanks", state.thanks);
+    if (!d.allHours) f("qhead", "Qty");
     f("taxlabel", taxName());
     let html = "";
     for (const i of d.items) {
-      html += `<tr><td>${esc(i.desc)}</td><td class="c">${i.hasH ? esc(hrs(i.h)) : ""}</td>` +
-              `<td class="c">${i.hasR ? rateFmt(i.r) : ""}</td><td class="c">${i.hasNums ? money(i.line) : ""}</td></tr>`;
+      html += `<tr><td>${esc(i.desc)}</td><td class="c">${esc(qc(d, i))}</td>` +
+              `<td class="c">${rc(d, i)}</td><td class="c">${i.hasNums ? money(i.line) : ""}</td></tr>`;
     }
     for (let k = 0; k < d.pad; k++) html += `<tr><td></td><td></td><td></td><td></td></tr>`;
-    html += `<tr><td></td><td class="c">${d.totalHours ? esc(hrs(d.totalHours)) : ""}</td><td></td><td></td></tr>`;
+    html += `<tr><td></td><td class="c">${d.allHours ? (d.totalHours ? esc(hrs(d.totalHours)) : "") : esc(tq(d))}</td><td></td><td></td></tr>`;
     root.querySelector('[data-f="lines"]').innerHTML = html;
     f("total", money(d.total));
     f("tax", plain(d.tax));
@@ -1219,12 +1255,12 @@
       ${period() ? `<div><div class="sw-k">Service period</div><div class="sw-v">${period()}</div></div>` : ""}
       <div class="job"${period() ? ' style="grid-column: span 2"' : ""}><div class="sw-k">Job</div><div class="sw-v">${esc(state.job)}</div></div>
     </div>
-    <table class="sw-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
-      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n amt">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+    <table class="sw-items"><thead><tr><th>Description</th><th class="n">${qHead(d, "Hours")}</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${qc(d, i)}</td><td class="n">${rc(d, i)}</td><td class="n amt">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
     </tbody></table>
     ${xBand("sw-k")}
     <div class="sw-foot">
-      <div><div class="sw-k">Total hours</div><div class="sw-hours">${hrs(d.totalHours)}<small> h</small></div><div class="sw-thanks">${esc(state.thanks)}</div></div>
+      <div><div class="sw-k">${tqLabel(d, "Total hours")}</div><div class="sw-hours">${d.allHours ? `${tq(d)}<small> h</small>` : tq(d)}</div><div class="sw-thanks">${esc(state.thanks)}</div></div>
       <div class="sw-sum">
         <div><span>Total</span><span>${money2(d.total)}</span></div>
         <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
@@ -1250,11 +1286,11 @@
       <div class="lg-no">INV-${esc(padNo(state.number))}</div>
       <h1>Invoice</h1>
       <div class="lg-sub">Job <b>${esc(state.job)}</b> · Terms <b>${esc(state.terms)}</b></div>
-      <table class="lg-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
-        ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+      <table class="lg-items"><thead><tr><th>Description</th><th class="n">${qHead(d, "Hours")}</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
+        ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${qc(d, i)}</td><td class="n">${rc(d, i)}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
       </tbody></table>
       <div class="lg-sum">
-        <div><span>Total hours</span><span class="mono">${hrs(d.totalHours)}</span></div>
+        <div><span>${tqLabel(d, "Total hours")}</span><span class="mono">${tq(d)}</span></div>
         <div><span>Total</span><span class="mono">${money2(d.total)}</span></div>
         <div><span>${esc(taxName())}</span><span class="mono">${plain(d.tax)}</span></div>
         <div class="bal"><span>Balance due</span><span class="mono">${money2(d.balance)}</span></div>
@@ -1275,11 +1311,11 @@
         ${period() ? `<dt>Period</dt><dd>${period()}</dd>` : ""}
       </dl>
     </div>
-    <table class="mn-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
-      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+    <table class="mn-items"><thead><tr><th>Description</th><th class="n">${qHead(d, "Hours")}</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${qc(d, i)}</td><td class="n">${rc(d, i)}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
     </tbody></table>
     <div class="mn-sum">
-      <div><span>Hours</span><span>${hrs(d.totalHours)}</span></div>
+      <div><span>${tqLabel(d, "Hours")}</span><span>${tq(d)}</span></div>
       <div><span>Total</span><span>${money2(d.total)}</span></div>
       <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
       <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
@@ -1299,10 +1335,10 @@
       <div><div class="cc-l">Job</div><div class="v">${esc(state.job)}</div>${period() ? `<div class="cc-l" style="margin-top:6px">Service period</div><div class="v">${period()}</div>` : ""}</div>
       <div><div class="cc-l">Terms</div><div class="v">${esc(state.terms)}</div></div>
     </div>
-    <table class="cc-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
-      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+    <table class="cc-items"><thead><tr><th>Description</th><th class="n">${qHead(d, "Hours")}</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${qc(d, i)}</td><td class="n">${rc(d, i)}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
       ${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(d.pad)}
-      <tr class="hrs"><td><span class="cc-l">Total hours</span></td><td class="n">${hrs(d.totalHours)}</td><td></td><td></td></tr>
+      <tr class="hrs"><td><span class="cc-l">${tqLabel(d, "Total hours")}</span></td><td class="n">${tq(d)}</td><td></td><td></td></tr>
     </tbody></table>
     <div class="cc-low">
       <div class="cc-stamp">${esc(state.thanks)}</div>
@@ -1334,9 +1370,9 @@
         ${period() ? `<dt class="fm-sc">Service period</dt><dd>${period()}</dd>` : ""}
       </dl>
     </div>
-    <table class="fm-items"><thead><tr><th class="fm-sc">Description</th><th class="fm-sc n">Hours</th><th class="fm-sc n">Rate</th><th class="fm-sc n">Amount</th></tr></thead><tbody>
-      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
-      <tr class="hrs"><td>Total hours</td><td class="n">${hrs(d.totalHours)}</td><td></td><td></td></tr>
+    <table class="fm-items"><thead><tr><th class="fm-sc">Description</th><th class="fm-sc n">${qHead(d, "Hours")}</th><th class="fm-sc n">Rate</th><th class="fm-sc n">Amount</th></tr></thead><tbody>
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${qc(d, i)}</td><td class="n">${rc(d, i)}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+      <tr class="hrs"><td>${tqLabel(d, "Total hours")}</td><td class="n">${tq(d)}</td><td></td><td></td></tr>
     </tbody></table>
     <div class="fm-sum">
       <div><span>Total</span><span>${money2(d.total)}</span></div>
@@ -1348,7 +1384,7 @@
     <div class="fm-foot"><div class="fm-rule"></div><div class="thanks2">${esc(state.thanks)}</div></div>`;
 
   const rows = (d, amtClass) => d.items.map(i =>
-    `<tr><td>${esc(i.desc)}</td><td class="n">${i.hasH ? hrs(i.h) : ""}</td><td class="n">${i.hasR ? rateFmt(i.r) : ""}</td><td class="n ${amtClass || ""}">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("");
+    `<tr><td>${esc(i.desc)}</td><td class="n">${qc(d, i)}</td><td class="n">${rc(d, i)}</td><td class="n ${amtClass || ""}">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("");
 
   R.blueprint = d => `
     <div class="bp-frame">
@@ -1361,7 +1397,7 @@
         <div><div class="bp-l">Client</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
         <div><div class="bp-l">Payment terms</div><div class="v">${esc(state.terms)}</div><div class="bp-l" style="margin-top:8px">Scope</div><div class="v">${esc(state.job)}</div>${period() ? `<div class="bp-l" style="margin-top:8px">Service period</div><div class="v">${period()}</div>` : ""}</div>
       </div>
-      <table class="bp-items"><thead><tr><th class="bp-l">Description</th><th class="bp-l n">Hours</th><th class="bp-l n">Rate</th><th class="bp-l n">Amount</th></tr></thead><tbody>
+      <table class="bp-items"><thead><tr><th class="bp-l">Description</th><th class="bp-l n">${qHead(d, "Hours")}</th><th class="bp-l n">Rate</th><th class="bp-l n">Amount</th></tr></thead><tbody>
         ${rows(d)}
         ${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(d.pad)}
       </tbody></table>
@@ -1375,7 +1411,7 @@
           <div class="k bp-l">Prepared by</div><div>${esc(state.name)}</div>
           <div class="k bp-l">Date issued</div><div>${fmtDate(state.date)}</div>
           <div class="k bp-l">Due date</div><div>${fmtDate(state.due)}</div>
-          <div class="k bp-l">Total hours</div><div>${hrs(d.totalHours)}</div>
+          <div class="k bp-l">${tqLabel(d, "Total hours")}</div><div>${tq(d)}</div>
           <div class="big"><span class="bp-l">Balance due</span><b>${money2(d.balance)}</b></div>
         </div>
       </div>
@@ -1384,15 +1420,15 @@
   R.editorial = d => `
     <div class="ed-mast"><b>${esc(state.name)}</b><span>${fmtLong(state.date)}</span></div>
     <h1 class="ed-head"><em>Invoice</em> <span>no.&nbsp;${esc(state.number)}</span></h1>
-    <p class="ed-deck">${esc(state.job)} for <b>${esc(state.client)}</b>, ${hrs(d.totalHours)} hours billed on ${esc(state.terms)} terms.</p>
+    <p class="ed-deck">${esc(state.job)} for <b>${esc(state.client)}</b>, ${d.allHours ? hrs(d.totalHours) + " hours" : tq(d)} billed on ${esc(state.terms)} terms.</p>
     <div class="ed-cols">
       <div><div class="ed-k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
       <div><div class="ed-k">Details</div><div class="v">Issued ${fmtDate(state.date)}<br>Due ${fmtDate(state.due)}<br>${period() ? `Period ${period()}<br>` : ""}${esc(state.terms)} · ${esc(state.job)}</div></div>
       <div><div class="ed-k">Amount due</div><div class="amt">${money2(d.balance)}</div></div>
     </div>
-    <table class="ed-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d, "amt")}</tbody></table>
+    <table class="ed-items"><thead><tr><th>Description</th><th class="n">${qHead(d, "Hours")}</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d, "amt")}</tbody></table>
     <div class="ed-sum">
-      <div><span>Total hours</span><span>${hrs(d.totalHours)}</span></div>
+      <div><span>${tqLabel(d, "Total hours")}</span><span>${tq(d)}</span></div>
       <div><span>Total</span><span>${money2(d.total)}</span></div>
       <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
       <div class="bal"><span>Balance due</span><span>${money2(d.balance)}</span></div>
@@ -1410,12 +1446,12 @@
       <div><div class="bh-k">Dates</div><div class="v"><div class="row"><span>Issued</span><span>${fmtDate(state.date)}</span></div><div class="row"><span>Due</span><span>${fmtDate(state.due)}</span></div>${period() ? `<div class="row"><span>Period</span><span>${period()}</span></div>` : ""}</div></div>
       <div><div class="bh-k">Job</div><div class="v">${esc(state.job)}<div class="row" style="margin-top:4px"><span>Terms</span><span>${esc(state.terms)}</span></div></div></div>
     </div>
-    <table class="bh-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d, "amt")}</tbody></table>
+    <table class="bh-items"><thead><tr><th>Description</th><th class="n">${qHead(d, "Hours")}</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d, "amt")}</tbody></table>
     ${xBand("bh-k")}
     <div class="bh-low">
       <div class="bh-left">
         <div>
-          <div class="row"><span>Total hours</span><span>${hrs(d.totalHours)}</span></div>
+          <div class="row"><span>${tqLabel(d, "Total hours")}</span><span>${tq(d)}</span></div>
           <div class="row"><span>Total</span><span>${money2(d.total)}</span></div>
           <div class="row"><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
         </div>
@@ -1440,10 +1476,10 @@
       <dt>due</dt><dd>${fmtDate(state.due)}</dd>
     </dl>
     <div class="mo-rule"></div>
-    <table class="mo-items"><thead><tr><th>description</th><th class="n">hours</th><th class="n">rate</th><th class="n">amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
+    <table class="mo-items"><thead><tr><th>description</th><th class="n">${qHead(d, "hours")}</th><th class="n">rate</th><th class="n">amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
     <div class="mo-rule"></div>
     <div class="mo-sum">
-      <span>${hrs(d.totalHours)} h</span><span>total</span><span>${money2(d.total)}</span>
+      <span>${d.allHours ? hrs(d.totalHours) + " h" : tq(d)}</span><span>total</span><span>${money2(d.total)}</span>
       <span></span><span>${esc(taxName().toLowerCase())}</span><span>${plain(d.tax)}</span>
       <span></span><span class="b">balance due</span><span class="b">${money2(d.balance)}</span>
     </div>
@@ -1457,17 +1493,17 @@
     <h1 class="ti-h1">Invoice <span>#${esc(padNo(state.number))}</span></h1>
     <div class="ti-tiles">
       <div class="ti-tile dark"><div class="k">Balance due</div><div class="v">${money2(d.balance)}</div><div class="s">by ${fmtDate(state.due)}</div></div>
-      <div class="ti-tile"><div class="k">Hours</div><div class="v">${hrs(d.totalHours)}</div><div class="s">${d.items.length} line item${d.items.length === 1 ? "" : "s"}</div></div>
+      <div class="ti-tile"><div class="k">${tqLabel(d, "Hours")}</div><div class="v">${tq(d)}</div><div class="s">${d.items.length} line item${d.items.length === 1 ? "" : "s"}</div></div>
       <div class="ti-tile"><div class="k">Issued</div><div class="v">${fmtDate(state.date)}</div><div class="s">Due ${fmtDate(state.due)}</div></div>
     </div>
     <div class="ti-info">
       <div><div class="k">Billed to</div><div class="v"><b>${esc(state.client)}</b><br>${lines(state.addr)}${xc()}</div></div>
       <div><div class="k">Details</div><div class="v"><div class="row"><span>Job</span><span>${esc(state.job)}</span></div><div class="row"><span>Terms</span><span>${esc(state.terms)}</span></div><div class="row"><span>Due date</span><span>${fmtDate(state.due)}</span></div>${period() ? `<div class="row"><span>Service period</span><span>${period()}</span></div>` : ""}</div></div>
     </div>
-    <div class="ti-table"><table class="ti-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead>
+    <div class="ti-table"><table class="ti-items"><thead><tr><th>Description</th><th class="n">${qHead(d, "Hours")}</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead>
       <tbody>${rows(d, "amt")}</tbody>
       <tfoot>
-        <tr><td>Total</td><td class="n">${hrs(d.totalHours)}</td><td></td><td class="n">${money2(d.total)}</td></tr>
+        <tr><td>Total</td><td class="n">${tq(d)}</td><td></td><td class="n">${money2(d.total)}</td></tr>
         <tr><td>${esc(taxName())}</td><td></td><td></td><td class="n">${plain(d.tax)}</td></tr>
         <tr><td><b>Balance due</b></td><td></td><td></td><td class="n"><b>${money2(d.balance)}</b></td></tr>
       </tfoot></table></div>
@@ -1491,9 +1527,9 @@
         ${period() ? `<div class="mg-lead"><span>Period</span><i></i><span>${period()}</span></div>` : ""}
       </div></div>
     </div>
-    <table class="mg-items"><thead><tr><th class="mg-sc">Description</th><th class="mg-sc n">Hours</th><th class="mg-sc n">Rate</th><th class="mg-sc n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
+    <table class="mg-items"><thead><tr><th class="mg-sc">Description</th><th class="mg-sc n">${qHead(d, "Hours")}</th><th class="mg-sc n">Rate</th><th class="mg-sc n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
     <div class="mg-sum">
-      <div class="mg-lead"><span>Total hours</span><i></i><span>${hrs(d.totalHours)}</span></div>
+      <div class="mg-lead"><span>${tqLabel(d, "Total hours")}</span><i></i><span>${tq(d)}</span></div>
       <div class="mg-lead"><span>Total</span><i></i><span>${money2(d.total)}</span></div>
       <div class="mg-lead"><span>${esc(taxName())}</span><i></i><span>${plain(d.tax)}</span></div>
       <div class="mg-lead bal"><span>Balance due</span><i></i><span>${money2(d.balance)}</span></div>
@@ -1512,12 +1548,12 @@
         <div><div class="dc-k">Invoice</div><div class="v">No. ${esc(padNo(state.number))}<br>Issued ${fmtDate(state.date)}<br>Due ${fmtDate(state.due)}${period() ? `<br>Period ${period()}` : ""}</div></div>
         <div><div class="dc-k">Engagement</div><div class="v">${esc(state.job)}<br>${esc(state.terms)}</div></div>
       </div>
-      <table class="dc-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
+      <table class="dc-items"><thead><tr><th>Description</th><th class="n">${qHead(d, "Hours")}</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table>
       ${xBand("dc-k")}
       <div class="dc-low">
         <div class="dc-thx">${esc(state.thanks)}</div>
         <div class="dc-sum">
-          <div><span>Total hours</span><span>${hrs(d.totalHours)}</span></div>
+          <div><span>${tqLabel(d, "Total hours")}</span><span>${tq(d)}</span></div>
           <div><span>Total</span><span>${money2(d.total)}</span></div>
           <div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>
           <div class="bal"><span class="dc-k" style="margin:0;color:inherit">Balance due</span><b>${money2(d.balance)}</b></div>
@@ -1548,10 +1584,10 @@
       <div class="rc-row"><span>DUE</span><span>${fmtDate(state.due)}</span></div>
       ${period() ? `<div class="rc-row"><span>PERIOD</span><span>${period()}</span></div>` : ""}
       <div class="rc-dash"></div>
-      ${d.items.map(i => `<div class="rc-item"><div class="d">${esc(i.desc)}</div><div class="rc-row"><span>${i.hasH ? hrs(i.h) : "0"} h x ${i.hasR ? rateFmt(i.r) : "$0.00"}</span><span>${i.hasNums ? money2(i.line) : ""}</span></div></div>`).join("")}
+      ${d.items.map(i => `<div class="rc-item"><div class="d">${esc(i.desc)}</div><div class="rc-row"><span>${d.allHours ? `${i.hasH ? hrs(i.h) : "0"} h x ${i.hasR ? rateFmt(i.r) : "$0.00"}` : `${qtyWord(i.h, i.u)} x ${rateFmt(i.r)}`}</span><span>${i.hasNums ? money2(i.line) : ""}</span></div></div>`).join("")}
       <div class="rc-dash"></div>
       <div class="rc-tot">
-        <div class="rc-row"><span>TOTAL HOURS</span><span>${hrs(d.totalHours)}</span></div>
+        <div class="rc-row"><span>${tqLabel(d, "TOTAL HOURS")}</span><span>${tq(d)}</span></div>
         <div class="rc-row"><span>TOTAL</span><span>${money2(d.total)}</span></div>
         <div class="rc-row"><span>${esc(taxName().toUpperCase())}</span><span>${plain(d.tax)}</span></div>
       </div>
@@ -1574,12 +1610,12 @@
       <div class="br-box"><div class="br-k">Due date</div><div class="v"><b style="font-size:13pt">${fmtDate(state.due)}</b><br>${esc(state.terms)}${period() ? `<br>Period ${period()}` : ""}</div></div>
       <div class="br-box"><div class="br-k">Job</div><div class="v">${esc(state.job)}</div></div>
     </div>
-    <div class="br-table br-box"><table class="br-items"><thead><tr><th>Description</th><th class="n">Hours</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table></div>
+    <div class="br-table br-box"><table class="br-items"><thead><tr><th>Description</th><th class="n">${qHead(d, "Hours")}</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody>${rows(d)}</tbody></table></div>
     ${xBand("br-k")}
     <div class="br-low">
       <div><span class="br-thx">${esc(state.thanks)}</span></div>
       <div class="br-sum br-box">
-        <div><span>Total hours</span><span class="mono">${hrs(d.totalHours)}</span></div>
+        <div><span>${tqLabel(d, "Total hours")}</span><span class="mono">${tq(d)}</span></div>
         <div><span>Total</span><span class="mono">${money2(d.total)}</span></div>
         <div><span>${esc(taxName())}</span><span class="mono">${plain(d.tax)}</span></div>
         <div><span class="br-k">Balance due</span><b>${money2(d.balance)}</b></div>
@@ -1639,12 +1675,12 @@
     const it = xItems(XM < 2, XM < 1);
     return it.length ? `<div class="xn">${it.map(([t, b]) => `<div class="xn-i"><div class="${lbl}">${t}</div><div class="xn-b">${b}</div></div>`).join("")}</div>` : "";
   };
-  const qtyText = i => i.hasH ? hrs(i.h) + (filled(state.unit) ? " " + esc(state.unit) : "") : "";
+  const qtyText = i => i.hasH ? qtyWord(i.h, i.u) : "";
 
   // part: undefined = whole invoice on one page; "main" / "rest" = split over two pages when it does not fit
   R.contractor = (d, part) => {
     const bank = bankLines();
-    const foot = pg => `<div class="ct-foot"><span class="thx">${pg === 1 && part === "main" ? "" : esc(state.thanks)}</span><span>Invoice ${esc(state.number)} · Total hours ${hrs(d.totalHours)}${part ? ` · Page ${pg} of 2` : ""}</span></div>`;
+    const foot = pg => `<div class="ct-foot"><span class="thx">${pg === 1 && part === "main" ? "" : esc(state.thanks)}</span><span>Invoice ${esc(state.number)} · ${tqLabel(d, "Total hours")} ${tq(d)}${part ? ` · Page ${pg} of 2` : ""}</span></div>`;
     const run = `<div class="ct-run"><span>Invoice</span><span>${esc(state.legalName || state.name)}</span></div>`;
     const rest = `
     ${filled(state.vatMention) ? `<div class="ct-h">VAT mention</div><p class="ct-p">${lines(state.vatMention)}</p>` : ""}
@@ -1669,7 +1705,7 @@
     </div>
     <table class="ct-tbl ct-items">
       <tr><th>Description of services</th><th class="n">Quantity</th><th class="n">Unit price${exclTax()}</th><th class="n">Amount${exclTax()}</th></tr>
-      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${qtyText(i)}</td><td class="n">${i.hasR ? money2(i.r) : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
+      ${d.items.map(i => `<tr><td>${esc(i.desc)}</td><td class="n">${qtyText(i)}</td><td class="n">${i.hasR ? money2(i.r) + " / " + UNITS[i.u].one : ""}</td><td class="n">${i.hasNums ? money2(i.line) : ""}</td></tr>`).join("")}
     </table>
     <table class="ct-tbl ct-sum">
       <tr><th></th><th>Amount (${esc(state.currency || "USD")})</th></tr>
@@ -1794,6 +1830,15 @@
       }
     }
     if (p2el.hidden === want2) { p2el.hidden = !want2; fit(); }
+    const bu = unitOf({ unit: state.billUnit });
+    $("rateLbl").textContent = "Rate per " + UNITS[bu].one;
+    $("hoursPerDayBox").hidden = bu !== "hour";
+    $("genHint").textContent = {
+      hour: "Adds one row per Monday–Friday week, at your hours per day.",
+      day: "Adds one row per Monday–Friday week, counting working days.",
+      week: "Adds one row per Monday–Friday week. A partial week counts as a fraction, e.g. 3 days = 0.6 weeks.",
+      month: "Adds one row for the whole month, quantity 1.",
+    }[bu];
     $("setupNote").textContent = filled(state.name) ? "" : "Start here";
     $("taxPctLbl").textContent = taxName() + " (%)";
 
@@ -1807,8 +1852,8 @@
       (state.due ? `<span class="opt">due ${fmtDate(state.due)}</span>` : "");
 
     // per-row amounts + totals in the form
-    d.items.forEach((i, k) => { const el = document.querySelector(`[data-amt="${k}"]`); if (el) el.innerHTML = i.hasNums ? money2(i.line) : "—"; });
-    $("itemCount").textContent = d.items.length ? `${d.items.length} row${d.items.length === 1 ? "" : "s"} · ${hrs(d.totalHours)} h` : "";
+    d.items.forEach((i, k) => { const el = document.querySelector(`[data-amt="${k}"]`); if (el) el.innerHTML = `<small>${i.hasH ? qtyWord(i.h, i.u) : "—"} × ${i.hasR ? money2(i.r) + UNITS[i.u].per : "—"}</small><b>${i.hasNums ? money2(i.line) : "—"}</b>`; });
+    $("itemCount").textContent = d.items.length ? `${d.items.length} row${d.items.length === 1 ? "" : "s"} · ${d.allHours ? hrs(d.totalHours) + " h" : tq(d)}` : "";
     $("totals").innerHTML = d.items.length ?
       `<div><span>Total</span><span>${money2(d.total)}</span></div>` +
       `<div><span>${esc(taxName())}</span><span>${plain(d.tax)}</span></div>` +
